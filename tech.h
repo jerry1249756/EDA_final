@@ -42,9 +42,4 @@ struct die_rows
     int repeat_count;
 };
 
-struct Net
-{
-    std::vector<
-};
-
 #endif
