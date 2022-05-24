@@ -127,7 +127,8 @@ int main(int argc, char* argv[]){
     nodes[1].show_data();
     nodes[0].show_data();
     */
-    
+    nodes[500].show_data();
+    n[25]->show_data();
     
     die_area = (die_upper_x - die_lower_x) * (die_upper_y - die_lower_y);
     FM_algorithm(nodes,n);

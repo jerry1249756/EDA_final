@@ -10,7 +10,6 @@ int A_area=0, B_area=0;
 void initialize_gain(vector<cell_node>& v){
     for(vector<cell_node>::iterator it=v.begin(); it!=v.end(); ++it){
         (*it).set_gain();
-        //cout << (*it).node_name << " " << (*it).gain << " ";
     }
     return;
 }
@@ -30,26 +29,26 @@ void initialize_area(vector<cell_node>& v){
 bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
     if((*c).part == PART::TECH_A){
         if(tech_stack[1].tech_name == "TB"){
-            if(B_area + (*c).area > die_area*bottom_die_max_util/100){
-                //cout << (*c).node_name << " not valid\n";
+            if(B_area + c->area > die_area/100*bottom_die_max_util){
+                //cout << c->node_name << " not valid\n";
                 return false;
             }
         }
         else{
-            if(B_area + (*c).area > die_area*top_die_max_util/100){
-                //cout << (*c).node_name << " not valid\n";
+            if(B_area + c->area > die_area/100*top_die_max_util){
+                //cout << c->node_name << " not valid\n";
                 return false;
             }
         }
     }else{
         if(tech_stack[1].tech_name == "TA"){
-            if(A_area + (*c).area > die_area*bottom_die_max_util/100){
+            if(A_area + (*c).area > die_area/100*bottom_die_max_util){
                 //cout << (*c).node_name << " not valid\n";
                 return false;
             }
         }
         else{
-            if(A_area + (*c).area > die_area*top_die_max_util/100){
+            if(A_area + (*c).area > die_area/100*top_die_max_util){
                 //cout << (*c).node_name << " not valid\n";
                 return false;
             }
@@ -60,7 +59,7 @@ bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
 
 cell_node* find_max_gain_node(vector<cell_node>& v){
     cell_node* temp=NULL;
-    int max_gain = -1000000;
+    int max_gain = INT32_MIN;
     for(vector<cell_node>::iterator it=v.begin(); it!=v.end(); ++it){
         if((*it).state == LOCK_STATE::UNLOCKED){ 
             if(check_swap_area_constraint(v,&(*it))){
@@ -152,8 +151,7 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
     return;
 }
 
-void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
-    /*
+void print_current_state(vector<cell_node>& v, vector<partition_net*> n){/*
     vector<cell_node> A_part_nodes;
     vector<cell_node> B_part_nodes;
     vector<cell_node> locked_nodes;
@@ -192,6 +190,13 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
     cout << "A part nodes: (total area: " << A_area << ")\n";
     cout << "\nB part nodes: (total area: " << B_area << ")\n";
     cout << A_part_nodes.size() << " " << B_part_nodes.size();
+    int cutsize=0;
+    for(vector<partition_net*>::iterator it=n.begin(); it!=n.end(); ++it){
+        if((*it)->is_cut()){
+            cutsize+=1;
+        }
+    }
+    cout << "cutsize:" << cutsize << "\n";
 }
 
 void FM_algorithm(vector<cell_node>& v, vector<partition_net*> n){
@@ -205,9 +210,8 @@ void FM_algorithm(vector<cell_node>& v, vector<partition_net*> n){
         swap_and_recalculate(v,m);
     }
     */
-    
     while(m!=NULL){ //there is still valid node to move
-        print_current_state(v,n);
+        //print_current_state(v,n);
         swap_and_recalculate(v,m);
         m = find_max_gain_node(v);
     }
