@@ -1,9 +1,9 @@
 #include "FM_alg.h"
 
-unsigned int numNodes = 8;
-unsigned int numNets = 6;
-unsigned int die_area = 900;
-unsigned int top_die_max_util = 80, bottom_die_max_util = 90; 
+int numNodes = 8;
+int numNets = 6;
+int die_area = 900;
+int top_die_max_util = 80, bottom_die_max_util = 90; 
 
 int main(){
     cell_node c1("c1", 70);
@@ -15,7 +15,7 @@ int main(){
     cell_node c7("c7", 160);  
     cell_node c8("c8", 70); 
     vector<cell_node> c;
-    vector<net> n;
+    vector<net*> n;
     net net1("n1"), net2("n2"), net3("n3"), net4("n4"), net5("n5"), net6("n6");
     net1.add_node(&c1);
     net1.add_node(&c2);
@@ -32,6 +32,7 @@ int main(){
     net5.add_node(&c6);
     net6.add_node(&c4);
     net6.add_node(&c5);
+    cout << c1.connected_nets[0] << "\n" ;
     c.push_back(c1);
     c.push_back(c2);
     c.push_back(c3);
@@ -40,6 +41,14 @@ int main(){
     c.push_back(c6);
     c.push_back(c7);
     c.push_back(c8);
+    n.push_back(&net1);
+    n.push_back(&net2);
+    n.push_back(&net3);
+    n.push_back(&net4);
+    n.push_back(&net5);
+    n.push_back(&net6);
+    cout << &n[0] << "\n";
+    cout << &net1 << "\n";
 
     FM_algorithm(c, n);
 }

@@ -53,7 +53,7 @@ net::net(string name){
 };
 
 void net::add_node(cell_node* c){
-    this->connected_nodes.push_back(c);
+    connected_nodes.push_back(c);
     c->connected_nets.push_back(this);
     if(c->part==PART::TECH_A) Dist.A+=1;
     else if(c->part==PART::TECH_B) Dist.B+=1;
