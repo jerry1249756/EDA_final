@@ -29,7 +29,7 @@ void instance::set_pos(point p){
 
 int manhat_dist(point a, point b){
     return abs(a.x-b.x)+abs(a.y-b.y);
-};
+}
 
 int split1(string a){
     int i = 0;
@@ -39,4 +39,4 @@ int split1(string a){
         i++;
     }
     return i;
-};
+}

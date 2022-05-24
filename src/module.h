@@ -9,7 +9,6 @@ using namespace std;
 
 enum class PART{TECH_A=0, TECH_B=1};
 
-
 //<instance_name, pin_name>
 typedef pair<string,string> ip;
 #define INSTANCE first 
@@ -81,6 +80,5 @@ class net{
 };
 
 int manhat_dist(point, point);
-
 int split1(string);
 #endif

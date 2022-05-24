@@ -6,6 +6,7 @@ using namespace std;
 vector<tech> tech_stack;
 int die_area;
 int top_die_max_util, bottom_die_max_util;
+int top_repeat_count, bottom_repeat_count; 
 
 int main(int argc, char* argv[]){
     //read file
@@ -17,8 +18,8 @@ int main(int argc, char* argv[]){
     string trash, Tech_name, Libcell_name, pin_name, top_die_tech, bottom_die_tech, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y, die_lower_x, die_lower_y;
     int die_upper_x, die_upper_y;
-    int top_start_x, top_start_y, top_row_length, top_row_height, top_repeat_count;  
-    int bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height, bottom_repeat_count;  
+    int top_start_x, top_start_y, top_row_length, top_row_height;  
+    int bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height;  
     int terminal_size_x, terminal_size_y, terminal_spacing;
     int Num_instance, Num_net, Num_net_pin;
 
@@ -89,27 +90,49 @@ int main(int argc, char* argv[]){
     //read file finish
 
     //partition
+    
     vector<cell_node> nodes;
     for(auto it = instances.begin(); it != instances.end(); ++it){
         cell_node C(it->first, (it->second).libcell_type);
         nodes.push_back(C);
     }
+    //cout << &nodes[0];
+    //cout << endl;
+
+    partition_net* temp_partition = new partition_net[Num_net];
 
     vector<partition_net*> n;
+    int* x = new int;
+    *x = 0;
     for(auto it = nets.begin(); it != nets.end(); ++it){
-        partition_net net1(it->first);
-        for(auto it1 = nodes.begin(); it1 != nodes.end(); ++it1){
-            for(auto it2 = (it->second).net_pin.begin(); it2 != (it->second).net_pin.end(); ++it2){
+        temp_partition[*x] = partition_net (it->first);
+        //cout << temp_partition[*x].net_name << " ";
+        for(vector<cell_node>::iterator it1 = nodes.begin(); it1 != nodes.end(); ++it1){
+            for(vector<ip>::iterator it2 = (it->second).net_pin.begin(); it2 != (it->second).net_pin.end(); ++it2){
                 if(it2->INSTANCE == it1->node_name){
-                    net1.add_node(&(*it1));
+                    //cout << it2->INSTANCE << " ";
+                    temp_partition[*x].add_node(&(*it1));
                 }
             }
+            //cout << endl;
         }
-        n.push_back(&net1);
+        //cout << &(temp_partition[*x]) << " ";
+        n.push_back(&(temp_partition[*x]));
+        (*x)++;
     }
+    //cout << endl;
+    //cout << n[0];
+    /*
+    n[1]->show_data();
+    nodes[1].show_data();
+    nodes[0].show_data();
+    */
+    
+    
     die_area = (die_upper_x - die_lower_x) * (die_upper_y - die_lower_y);
     FM_algorithm(nodes,n);
-
+    delete x;
+    delete[] temp_partition;
     fin.close();
     return 0;
 }

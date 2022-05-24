@@ -1,6 +1,7 @@
 #include "partition.h"
 
 extern vector<tech> tech_stack;
+extern int top_repeat_count, bottom_repeat_count;
 
 cell_node::cell_node(string name, string type){
     node_name = name;
@@ -8,8 +9,15 @@ cell_node::cell_node(string name, string type){
     //avoid using rand()
     random_device rd;
     mt19937 gen(rd());
-    uniform_int_distribution<> distrib(0,1);
-    part = (distrib(gen))? PART::TECH_B : PART::TECH_A;
+    uniform_int_distribution<> distrib(0,100);
+    int temp = distrib(gen);
+    if(tech_stack[0].tech_name == "TA"){
+        part = (temp < 100*top_repeat_count*top_repeat_count/(top_repeat_count*top_repeat_count+bottom_repeat_count*bottom_repeat_count))? PART::TECH_A : PART::TECH_B; 
+    }
+    else{
+        part = (temp > 100*top_repeat_count*top_repeat_count/(top_repeat_count*top_repeat_count+bottom_repeat_count*bottom_repeat_count))? PART::TECH_A : PART::TECH_B; 
+    }
+    
     if(part == PART::TECH_A){
         if(tech_stack[0].tech_name == "TA"){
             area = tech_stack[0].libcells[libcell_type].get_area();
@@ -84,6 +92,11 @@ void cell_node::update_area(){
     }
     return;
 }
+
+partition_net::partition_net(){
+    Dist.A=0;
+    Dist.B=0;
+};
 
 partition_net::partition_net(string name){
     net_name = name ;

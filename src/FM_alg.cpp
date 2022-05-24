@@ -8,9 +8,9 @@ extern vector<tech> tech_stack;
 int A_area=0, B_area=0;
 
 void initialize_gain(vector<cell_node>& v){
-    cout << "initialize gain:\n";
     for(vector<cell_node>::iterator it=v.begin(); it!=v.end(); ++it){
         (*it).set_gain();
+        //cout << (*it).node_name << " " << (*it).gain << " ";
     }
     return;
 }
@@ -31,26 +31,26 @@ bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
     if((*c).part == PART::TECH_A){
         if(tech_stack[1].tech_name == "TB"){
             if(B_area + (*c).area > die_area*bottom_die_max_util/100){
-                cout << (*c).node_name << " not valid\n";
+                //cout << (*c).node_name << " not valid\n";
                 return false;
             }
         }
         else{
             if(B_area + (*c).area > die_area*top_die_max_util/100){
-                cout << (*c).node_name << " not valid\n";
+                //cout << (*c).node_name << " not valid\n";
                 return false;
             }
         }
     }else{
         if(tech_stack[1].tech_name == "TA"){
             if(A_area + (*c).area > die_area*bottom_die_max_util/100){
-                cout << (*c).node_name << " not valid\n";
+                //cout << (*c).node_name << " not valid\n";
                 return false;
             }
         }
         else{
             if(A_area + (*c).area > die_area*top_die_max_util/100){
-                cout << (*c).node_name << " not valid\n";
+                //cout << (*c).node_name << " not valid\n";
                 return false;
             }
         }
@@ -113,10 +113,8 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
         F_n -= 1;
         T_n += 1;
         if (from == PART::TECH_A){
-            cout << (*it)->net_name <<  " A,B = (" <<(*it)->Dist.A << " " <<  (*it)->Dist.B << "), F, T= (" << F_n << " " << T_n << ") \n" ;
             (*it)->Dist.A = F_n;
             (*it)->Dist.B = T_n;
-            cout << (*it)->net_name <<  " A,B = (" <<(*it)->Dist.A << " " <<  (*it)->Dist.B << ")\n";
         }else{
             (*it)->Dist.B = F_n;
             (*it)->Dist.A = T_n;
@@ -155,6 +153,7 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
 }
 
 void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
+    /*
     vector<cell_node> A_part_nodes;
     vector<cell_node> B_part_nodes;
     vector<cell_node> locked_nodes;
@@ -165,6 +164,7 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
             locked_nodes.push_back((*it));
         }
     }
+    
     cout << "A part nodes: (total area: " << A_area << ")\n";
     for(vector<cell_node>::iterator it=A_part_nodes.begin(); it!=A_part_nodes.end(); ++it){
         cout << (*it).node_name << "(" << (*it).gain << ") ";
@@ -173,6 +173,7 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
     for(vector<cell_node>::iterator it=B_part_nodes.begin(); it!=B_part_nodes.end(); ++it){
         cout << (*it).node_name << "(" << (*it).gain << ") ";
     }
+    
     cout << "\nlocked nodes:";
     for(vector<cell_node>::iterator it=locked_nodes.begin(); it!=locked_nodes.end(); ++it){
         cout << (*it).node_name << " ";
@@ -181,6 +182,16 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
     for(vector<partition_net*>::iterator it=n.begin(); it!=n.end(); ++it){
         cout << (*it)->net_name << " (" << (*it)->Dist.A << "," << (*it)->Dist.B << ")\n";
     }
+    */
+    vector<cell_node> A_part_nodes;
+    vector<cell_node> B_part_nodes;
+    for(vector<cell_node>::iterator it=v.begin(); it!=v.end(); ++it){
+        if((*it).part==PART::TECH_A) A_part_nodes.push_back((*it));
+        else B_part_nodes.push_back((*it));
+    }
+    cout << "A part nodes: (total area: " << A_area << ")\n";
+    cout << "\nB part nodes: (total area: " << B_area << ")\n";
+    cout << A_part_nodes.size() << " " << B_part_nodes.size();
 }
 
 void FM_algorithm(vector<cell_node>& v, vector<partition_net*> n){
@@ -188,10 +199,13 @@ void FM_algorithm(vector<cell_node>& v, vector<partition_net*> n){
     initialize_area(v);
     print_current_state(v,n);
     cell_node* m = find_max_gain_node(v);
-    /*if(m!=NULL){
+    /*
+    if(m!=NULL){
         cout << (*m).node_name;
-        //swap_and_recalculate(v,m);
-    }*/
+        swap_and_recalculate(v,m);
+    }
+    */
+    
     while(m!=NULL){ //there is still valid node to move
         print_current_state(v,n);
         swap_and_recalculate(v,m);
