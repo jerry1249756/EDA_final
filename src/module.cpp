@@ -23,8 +23,8 @@ int libcell::get_area(){
     return width*height;
 };
 
-void libcell::set_pos(point p){
-    cell_pos = p;
+void instance::set_pos(point p){
+    instance_pos = p;
 }
 
 int manhat_dist(point a, point b){

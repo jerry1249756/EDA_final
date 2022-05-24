@@ -4,7 +4,12 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include "partition.h"
 using namespace std;
+
+typedef pair<string,string> ip;
+#define INSTANCE first 
+#define PIN second
 
 class point{
     public:
@@ -26,13 +31,19 @@ struct pin{
 class libcell{
     public:
         string cell_name;
-        point cell_pos;
         vector<pin> pins;
         libcell(){};
         libcell(int w,int h):width(w),height(h){};
         int width;
         int height;
         int get_area();
+};
+
+class instance{
+    public: 
+        point instance_pos;
+        string libcell_type;
+        PART tech;
         void set_pos(point);
 };
 
@@ -60,8 +71,7 @@ class net{
     public:
         net(){};
         string Net_name;
-        vector<string> instance;
-        vector<string> pin;
+        vector<ip> net_pin;
 };
 
 int manhat_dist(point, point);

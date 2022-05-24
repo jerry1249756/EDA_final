@@ -1,7 +1,6 @@
 #ifndef PARTITION_H
 #define PARTITION_H
 
-//#include "module.h"
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -17,7 +16,7 @@ typedef pair<int,int> distribution;
 #define A first 
 #define B second
 
-class net; //forward declaration for two types pointer using together
+class partition_net; //forward declaration for two types pointer using together
 
 class cell_node{
     public:
@@ -28,26 +27,24 @@ class cell_node{
         LOCK_STATE state;
         int area;
         int gain;
-        vector<net*> connected_nets;
+        vector<partition_net*> connected_nets;
         bool operator==(const cell_node &) const;
         void set_gain();
         void show_data();
 };
 
-class net{
+class partition_net{
     public:
-        net(string);
+        partition_net(string);
         string net_name;
         distribution Dist;
         vector<cell_node*> connected_nodes;
+        
         void add_node(cell_node*);
         bool is_cut();
         bool is_critical();
         void recalc_dist();
         void show_data();
 };
-
-//dictionary: key: <cell_name, tech_name> value: corresponding libcell
-//unordered_map<pair<string, string>, libcell> dictionary; //TODO
 
 #endif

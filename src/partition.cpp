@@ -19,12 +19,12 @@ bool cell_node::operator==(const cell_node & c) const{
 void cell_node::set_gain(){ //need debug!
     if(part==PART::TECH_A){//from = A, to = B
         //vector use iterator for performance
-        for(vector<net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
+        for(vector<partition_net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
             if((*it)->Dist.A==1) gain+=1; 
             else if((*it)->Dist.B==0) gain-=1; 
         }
     }else if(part==PART::TECH_B){ //from = B, to = A
-        for(vector<net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
+        for(vector<partition_net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
             if((*it)->Dist.B==1) gain+=1;
             else if((*it)->Dist.A==0) gain-=1; 
         }
@@ -39,38 +39,38 @@ void cell_node::show_data(){
     cout << "gain:      " << gain << "\n";
     cout << "area:      " << area << "\n";
     cout << "connected_nets:";
-    for(vector<net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
+    for(vector<partition_net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
         cout << (*it)->net_name << " ";
     }
     cout << "\n";
     return;
 };
 
-net::net(string name){
+partition_net::partition_net(string name){
     net_name = name ;
     Dist.A=0;
     Dist.B=0;
 };
 
-void net::add_node(cell_node* c){
+void partition_net::add_node(cell_node* c){
     this->connected_nodes.push_back(c);
     c->connected_nets.push_back(this);
     if(c->part==PART::TECH_A) Dist.A+=1;
     else if(c->part==PART::TECH_B) Dist.B+=1;
 };
 
-bool net::is_cut(){
+bool partition_net::is_cut(){
     if(Dist.A==0 || Dist.B==0) return false;
     else return true;
 };
 
-bool net::is_critical(){
+bool partition_net::is_critical(){
     if(Dist.A==(1 || 0)) return true; 
     else if(Dist.B == (1 || 0))return true; 
     else return false;
 };
 
-void net::show_data(){
+void partition_net::show_data(){
     cout << "net name:    " << net_name << "\n";
     cout << "Distribution:(" << Dist.A << " " << Dist.B << ")\n";
     cout << "connected_nodes:";

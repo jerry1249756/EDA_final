@@ -70,25 +70,22 @@ int main(int argc, char* argv[]){
         vector<string> instances;
         vector<string> pins;
         fin >> trash >> net_name >> Num_net_pin;
+        net net;
+        net.Net_name = net_name;
         for(int j = 0; j < Num_net_pin; j++){
-            
+            ip temp_pair;
             string temp;
             fin >> trash >> temp;
             string temp2 = "/";
             vector<string> temp3 = split(temp, temp2);
-            instance_name = temp3[0];
-            pin_name = temp3[1];
-            instances.push_back(instance_name);
-            pins.push_back(pin_name);
+            temp_pair.INSTANCE = temp3[0];
+            temp_pair.PIN = temp3[1];
+            net.net_pin.push_back(temp_pair);
         }
-        net net;
-        net.Net_name = net_name;
-        net.instance = instances;
-        net.pin = pins;
         nets[net_name] = net;
     }
 
-    cout << nets["N5"].pin[0] << endl;
+    cout << nets["N4"].net_pin[0].INSTANCE << endl;
 
     fin.close();
     return 0;
