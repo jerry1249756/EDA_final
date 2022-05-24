@@ -82,13 +82,5 @@ class net{
 
 int manhat_dist(point, point);
 
-int split1(string a){
-    int i = 0;
-    while(true){
-        if(a[i] == '/')
-            break;
-        i++;
-    }
-    return i;
-}
+int split1(string);
 #endif
