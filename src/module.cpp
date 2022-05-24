@@ -30,3 +30,13 @@ void instance::set_pos(point p){
 int manhat_dist(point a, point b){
     return abs(a.x-b.x)+abs(a.y-b.y);
 }
+
+int split1(string a){
+    int i = 0;
+    while(true){
+        if(a[i] == '/')
+            break;
+        i++;
+    }
+    return i;
+}

@@ -37,8 +37,7 @@ class partition_net{
         partition_net(string);
         string net_name;
         distribution Dist;
-        vector<cell_node*> connected_nodes;
-        
+        vector<cell_node*> connected_nodes;      
         void add_node(cell_node*);
         bool is_cut();
         bool is_critical();
