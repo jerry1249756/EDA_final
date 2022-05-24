@@ -1,13 +1,32 @@
 #include "partition.h"
 
-cell_node::cell_node(string name, int a){
+extern vector<tech> tech_stack;
+
+cell_node::cell_node(string name, string type){
     node_name = name;
-    area = a;
+    libcell_type = type;
     //avoid using rand()
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> distrib(0,1);
     part = (distrib(gen))? PART::TECH_B : PART::TECH_A;
+    if(part == PART::TECH_A){
+        if(tech_stack[0].tech_name == "TA"){
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        }
+        else{
+            area = tech_stack[1].libcells[libcell_type].get_area();
+        }
+    }
+    else{
+        if(tech_stack[0].tech_name == "TB"){
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        }
+        else{
+            area = tech_stack[1].libcells[libcell_type].get_area();
+        }
+    }
+        
     state = LOCK_STATE::UNLOCKED;
     gain = 0;
 }
@@ -46,6 +65,26 @@ void cell_node::show_data(){
     return;
 };
 
+void cell_node::update_area(){
+    if(part == PART::TECH_A){
+        if(tech_stack[0].tech_name == "TA"){
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        }
+        else{
+            area = tech_stack[1].libcells[libcell_type].get_area();
+        }
+    }
+    else{
+        if(tech_stack[0].tech_name == "TB"){
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        }
+        else{
+            area = tech_stack[1].libcells[libcell_type].get_area();
+        }
+    }
+    return;
+}
+
 partition_net::partition_net(string name){
     net_name = name ;
     Dist.A=0;
@@ -53,7 +92,7 @@ partition_net::partition_net(string name){
 };
 
 void partition_net::add_node(cell_node* c){
-    this->connected_nodes.push_back(c);
+    connected_nodes.push_back(c);
     c->connected_nets.push_back(this);
     if(c->part==PART::TECH_A) Dist.A+=1;
     else if(c->part==PART::TECH_B) Dist.B+=1;

@@ -1,9 +1,8 @@
-#include "partition.h"
+#include "FM_alg.h"
 //extern variables
-extern int Num_instance;
-extern int Num_net;
 extern int die_area;
-extern int top_die_max_util, bottom_die_max_util; //top: tech A, bottom: tech B
+extern int top_die_max_util, bottom_die_max_util;
+extern vector<tech> tech_stack;
 
 //I don't know where to define this!!!
 int A_area=0, B_area=0;
@@ -30,14 +29,30 @@ void initialize_area(vector<cell_node>& v){
 
 bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
     if((*c).part == PART::TECH_A){
-        if(B_area + (*c).area > die_area*bottom_die_max_util/100){
-            cout << (*c).node_name << " not valid\n";
-            return false;
+        if(tech_stack[1].tech_name == "TB"){
+            if(B_area + (*c).area > die_area*bottom_die_max_util/100){
+                cout << (*c).node_name << " not valid\n";
+                return false;
+            }
+        }
+        else{
+            if(B_area + (*c).area > die_area*top_die_max_util/100){
+                cout << (*c).node_name << " not valid\n";
+                return false;
+            }
         }
     }else{
-        if(A_area + (*c).area >die_area*top_die_max_util/100){
-            cout << (*c).node_name << " not valid\n";
-            return false;
+        if(tech_stack[1].tech_name == "TA"){
+            if(A_area + (*c).area > die_area*bottom_die_max_util/100){
+                cout << (*c).node_name << " not valid\n";
+                return false;
+            }
+        }
+        else{
+            if(A_area + (*c).area > die_area*top_die_max_util/100){
+                cout << (*c).node_name << " not valid\n";
+                return false;
+            }
         }
     }
     return true;
@@ -62,7 +77,7 @@ cell_node* find_max_gain_node(vector<cell_node>& v){
 void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
     PART from;
     PART to;
-    if ((*c).part==PART::TECH_A){
+    if (c->part==PART::TECH_A){
         from = PART::TECH_A;
         to = PART::TECH_B;
     }else{
@@ -98,8 +113,10 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
         F_n -= 1;
         T_n += 1;
         if (from == PART::TECH_A){
+            cout << (*it)->net_name <<  " A,B = (" <<(*it)->Dist.A << " " <<  (*it)->Dist.B << "), F, T= (" << F_n << " " << T_n << ") \n" ;
             (*it)->Dist.A = F_n;
             (*it)->Dist.B = T_n;
+            cout << (*it)->net_name <<  " A,B = (" <<(*it)->Dist.A << " " <<  (*it)->Dist.B << ")\n";
         }else{
             (*it)->Dist.B = F_n;
             (*it)->Dist.A = T_n;
@@ -121,22 +138,23 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
         }
     }
     //swap the node and lock it, update relevant data
-    if ((*c).part==PART::TECH_A){
-        (*c).part = PART::TECH_B;
-        B_area += (*c).area;
-        A_area -= (*c).area;
+    if (c->part==PART::TECH_A){
+        A_area -= c->area;
+        c->part = PART::TECH_B;
+        c->update_area();
+        B_area += c->area;
     }
     else{
-        (*c).part = PART::TECH_A;
-        A_area += (*c).area;
-        B_area -= (*c).area;
-
+        B_area -= c->area;
+        c->part = PART::TECH_A;
+        c->update_area();
+        A_area += c->area;
     }
-    (*c).state = LOCK_STATE::LOCKED;
+    c->state = LOCK_STATE::LOCKED;
     return;
 }
 
-void print_current_state(vector<cell_node>& v, vector<partition_net>& n){
+void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
     vector<cell_node> A_part_nodes;
     vector<cell_node> B_part_nodes;
     vector<cell_node> locked_nodes;
@@ -160,12 +178,12 @@ void print_current_state(vector<cell_node>& v, vector<partition_net>& n){
         cout << (*it).node_name << " ";
     }
     cout << "\ncurrent net structure:\n";
-    for(vector<partition_net>::iterator it=n.begin(); it!=n.end(); ++it){
-        cout << (*it).net_name << " (" << (*it).Dist.A << "," << (*it).Dist.B << ")\n";
+    for(vector<partition_net*>::iterator it=n.begin(); it!=n.end(); ++it){
+        cout << (*it)->net_name << " (" << (*it)->Dist.A << "," << (*it)->Dist.B << ")\n";
     }
 }
 
-void FM_algorithm(vector<cell_node>& v, vector<partition_net>& n){
+void FM_algorithm(vector<cell_node>& v, vector<partition_net*> n){
     initialize_gain(v);
     initialize_area(v);
     print_current_state(v,n);

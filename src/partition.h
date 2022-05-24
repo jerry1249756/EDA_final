@@ -3,13 +3,11 @@
 
 #include <iostream>
 #include <utility>
-#include <vector>
 #include <random>
-#include <unordered_map>
+#include "module.h"
 
 using namespace std;
 
-enum class PART{TECH_A=0, TECH_B=1};
 enum class LOCK_STATE{UNLOCKED=0, LOCKED=1};
 
 typedef pair<int,int> distribution;
@@ -20,9 +18,9 @@ class partition_net; //forward declaration for two types pointer using together
 
 class cell_node{
     public:
-        cell_node(string, int); //cell_node(string, string);
+        cell_node(string, string);
         string node_name;
-        // string libcell_type; //TODO
+        string libcell_type; //TODO
         PART part;
         LOCK_STATE state;
         int area;
@@ -31,6 +29,7 @@ class cell_node{
         bool operator==(const cell_node &) const;
         void set_gain();
         void show_data();
+        void update_area();
 };
 
 class partition_net{

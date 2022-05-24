@@ -4,9 +4,13 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include "partition.h"
+
 using namespace std;
 
+enum class PART{TECH_A=0, TECH_B=1};
+
+
+//<instance_name, pin_name>
 typedef pair<string,string> ip;
 #define INSTANCE first 
 #define PIN second
@@ -41,6 +45,8 @@ class libcell{
 
 class instance{
     public: 
+        instance(){};
+        instance(string t):libcell_type(t){};
         point instance_pos;
         string libcell_type;
         PART tech;
@@ -76,25 +82,13 @@ class net{
 
 int manhat_dist(point, point);
 
-
-const std::vector<std::string> split(const std::string& str, const std::string& pattern) {
-    std::vector<std::string> result;
-    std::string::size_type begin, end;
-
-    end = str.find(pattern);
-    begin = 0;
-
-    while (end != std::string::npos) {
-        if (end - begin != 0) {
-            result.push_back(str.substr(begin, end-begin)); 
-        }    
-        begin = end + pattern.size();
-        end = str.find(pattern, begin);
+int split1(string a){
+    int i = 0;
+    while(true){
+        if(a[i] == '/')
+            break;
+        i++;
     }
-
-    if (begin != str.length()) {
-        result.push_back(str.substr(begin));
-    }
-    return result;        
+    return i;
 }
 #endif

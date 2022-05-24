@@ -1,22 +1,22 @@
 #include <fstream>
-#include <cstring>
-#include <iostream>
-#include <vector>
-#include <string>
-#include "module.h"
-#include <unordered_map>
+#include "FM_alg.h"
 
 using namespace std;
 
+vector<tech> tech_stack;
+int die_area;
+int top_die_max_util, bottom_die_max_util;
+
 int main(int argc, char* argv[]){
+    //read file
     fstream fin(argv[1]);
     //fstream fout(argv[2]);
-    vector<tech> tech_stack;
-    unordered_map<string, string> instances;
+    
+    unordered_map<string, instance> instances;
     unordered_map<string, net> nets;
     string trash, Tech_name, Libcell_name, pin_name, top_die_tech, bottom_die_tech, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y, die_lower_x, die_lower_y;
-    int die_upper_x, die_upper_y, top_die_max_util, bottom_die_max_util;  
+    int die_upper_x, die_upper_y;
     int top_start_x, top_start_y, top_row_length, top_row_height, top_repeat_count;  
     int bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height, bottom_repeat_count;  
     int terminal_size_x, terminal_size_y, terminal_spacing;
@@ -62,7 +62,8 @@ int main(int argc, char* argv[]){
     fin >> trash >> Num_instance;
     for(int i = 0; i < Num_instance; i++){
         fin >> trash >> instance_name >> Libcell_name;
-        instances[instance_name] = Libcell_name;
+        instance c(Libcell_name);
+        instances[instance_name] = c;
     }
     
     fin >> trash >> Num_net;
@@ -76,16 +77,38 @@ int main(int argc, char* argv[]){
             ip temp_pair;
             string temp;
             fin >> trash >> temp;
-            string temp2 = "/";
-            vector<string> temp3 = split(temp, temp2);
-            temp_pair.INSTANCE = temp3[0];
-            temp_pair.PIN = temp3[1];
+            int temp2 = split1(temp);
+            string c = temp.substr(0,temp2);
+            temp.erase(0,temp2+1);
+            temp_pair.INSTANCE = c;
+            temp_pair.PIN = temp;
             net.net_pin.push_back(temp_pair);
         }
         nets[net_name] = net;
     }
+    //read file finish
 
-    cout << nets["N4"].net_pin[0].INSTANCE << endl;
+    //partition
+    vector<cell_node> nodes;
+    for(auto it = instances.begin(); it != instances.end(); ++it){
+        cell_node C(it->first, (it->second).libcell_type);
+        nodes.push_back(C);
+    }
+
+    vector<partition_net*> n;
+    for(auto it = nets.begin(); it != nets.end(); ++it){
+        partition_net net1(it->first);
+        for(auto it1 = nodes.begin(); it1 != nodes.end(); ++it1){
+            for(auto it2 = (it->second).net_pin.begin(); it2 != (it->second).net_pin.end(); ++it2){
+                if(it2->INSTANCE == it1->node_name){
+                    net1.add_node(&(*it1));
+                }
+            }
+        }
+        n.push_back(&net1);
+    }
+    die_area = (die_upper_x - die_lower_x) * (die_upper_y - die_lower_y);
+    FM_algorithm(nodes,n);
 
     fin.close();
     return 0;
