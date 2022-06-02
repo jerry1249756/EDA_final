@@ -4,11 +4,12 @@
 using namespace std;
 
 vector<tech> tech_stack;
-int die_area;
+long long int die_area;
 int top_die_max_util, bottom_die_max_util;
 int top_repeat_count, bottom_repeat_count; 
 
 int main(int argc, char* argv[]){
+    //abort();
     //read file
     fstream fin(argv[1]);
     //fstream fout(argv[2]);

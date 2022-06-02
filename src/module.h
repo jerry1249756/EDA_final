@@ -7,8 +7,8 @@
 
 using namespace std;
 
-enum class PART{TECH_A=0, TECH_B=1};
-
+enum class PART{TOP=0, BOTTOM=1};
+enum class TECH{TECH_A=0, TECH_B=1};
 //<instance_name, pin_name>
 typedef pair<string,string> ip;
 #define INSTANCE first 
@@ -48,7 +48,7 @@ class instance{
         instance(string t):libcell_type(t){};
         point instance_pos;
         string libcell_type;
-        PART tech;
+        TECH tech;
         void set_pos(point);
 };
 
