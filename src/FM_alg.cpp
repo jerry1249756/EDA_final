@@ -1,6 +1,6 @@
 #include "FM_alg.h"
 //extern variables
-extern int die_area;
+extern long long int die_area;
 extern int top_die_max_util, bottom_die_max_util;
 extern vector<tech> tech_stack;
 
@@ -29,26 +29,26 @@ void initialize_area(vector<cell_node>& v){
 bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
     if((*c).part == PART::TECH_A){
         if(tech_stack[1].tech_name == "TB"){
-            if(B_area + c->area > die_area/100*bottom_die_max_util){
+            if(B_area + c->area > (die_area/100)*bottom_die_max_util){
                 //cout << c->node_name << " not valid\n";
                 return false;
             }
         }
         else{
-            if(B_area + c->area > die_area/100*top_die_max_util){
+            if(B_area + c->area > (die_area/100)*top_die_max_util){
                 //cout << c->node_name << " not valid\n";
                 return false;
             }
         }
     }else{
         if(tech_stack[1].tech_name == "TA"){
-            if(A_area + (*c).area > die_area/100*bottom_die_max_util){
+            if(A_area + c->area > (die_area/100)*bottom_die_max_util){
                 //cout << (*c).node_name << " not valid\n";
                 return false;
             }
         }
         else{
-            if(A_area + (*c).area > die_area/100*top_die_max_util){
+            if(A_area + c->area > (die_area/100)*top_die_max_util){
                 //cout << (*c).node_name << " not valid\n";
                 return false;
             }
