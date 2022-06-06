@@ -11,7 +11,7 @@ using namespace std;
 enum class LOCK_STATE{UNLOCKED=0, LOCKED=1};
 
 typedef pair<int,int> distribution;
-#define A first 
+#define T first 
 #define B second
 
 class partition_net; //forward declaration for two types pointer using together

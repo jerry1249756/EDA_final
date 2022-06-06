@@ -1,7 +1,7 @@
 #include "partition.h"
 
 extern vector<tech> tech_stack;
-extern int top_repeat_count, bottom_repeat_count;
+extern unsigned int top_repeat_count, bottom_repeat_count;
 
 cell_node::cell_node(string name, string type){
     node_name = name;
@@ -11,28 +11,14 @@ cell_node::cell_node(string name, string type){
     mt19937 gen(rd());
     uniform_int_distribution<> distrib(0,100);
     int temp = distrib(gen);
-    if(tech_stack[0].tech_name == "TA"){
-        part = (temp < 100*top_repeat_count*top_repeat_count/(top_repeat_count*top_repeat_count+bottom_repeat_count*bottom_repeat_count))? PART::TECH_A : PART::TECH_B; 
-    }
-    else{
-        part = (temp > 100*top_repeat_count*top_repeat_count/(top_repeat_count*top_repeat_count+bottom_repeat_count*bottom_repeat_count))? PART::TECH_A : PART::TECH_B; 
-    }
+    part = (temp < 100*top_repeat_count*top_repeat_count/(top_repeat_count*top_repeat_count+bottom_repeat_count*bottom_repeat_count))? PART::TOP : PART::BOTTOM; 
     
-    if(part == PART::TECH_A){
-        if(tech_stack[0].tech_name == "TA"){
-            area = tech_stack[0].libcells[libcell_type].get_area();
-        }
-        else{
-            area = tech_stack[1].libcells[libcell_type].get_area();
-        }
+    if(part == PART::TOP){
+        area = tech_stack[0].libcells[libcell_type].get_area();
     }
     else{
-        if(tech_stack[0].tech_name == "TB"){
-            area = tech_stack[0].libcells[libcell_type].get_area();
-        }
-        else{
-            area = tech_stack[1].libcells[libcell_type].get_area();
-        }
+        if(tech_stack.size() !=1) area = tech_stack[1].libcells[libcell_type].get_area();
+        else area = tech_stack[0].libcells[libcell_type].get_area();
     }
         
     state = LOCK_STATE::UNLOCKED;
@@ -44,16 +30,16 @@ bool cell_node::operator==(const cell_node & c) const{
 }
 
 void cell_node::set_gain(){ //need debug!
-    if(part==PART::TECH_A){//from = A, to = B
+    if(part==PART::TOP){//from = A, to = B
         //vector use iterator for performance
         for(vector<partition_net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
-            if((*it)->Dist.A==1) gain+=1; 
+            if((*it)->Dist.T==1) gain+=1; 
             else if((*it)->Dist.B==0) gain-=1; 
         }
-    }else if(part==PART::TECH_B){ //from = B, to = A
+    }else if(part==PART::BOTTOM){ //from = B, to = A
         for(vector<partition_net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
             if((*it)->Dist.B==1) gain+=1;
-            else if((*it)->Dist.A==0) gain-=1; 
+            else if((*it)->Dist.T==0) gain-=1; 
         }
     }
     return;
@@ -61,7 +47,7 @@ void cell_node::set_gain(){ //need debug!
 
 void cell_node::show_data(){
     cout << "node name: " << node_name << "\n";
-    cout << "part:      " << (part==PART::TECH_A? "tech_A" : "tech_B") << "\n" ;
+    cout << "part:      " << (part==PART::TOP? "top" : "bottom") << "\n" ;
     cout << "state:     " << (state==LOCK_STATE::LOCKED? "locked" : "unlocked") << "\n";
     cout << "gain:      " << gain << "\n";
     cout << "area:      " << area << "\n";
@@ -74,57 +60,48 @@ void cell_node::show_data(){
 };
 
 void cell_node::update_area(){
-    if(part == PART::TECH_A){
-        if(tech_stack[0].tech_name == "TA"){
-            area = tech_stack[0].libcells[libcell_type].get_area();
-        }
-        else{
-            area = tech_stack[1].libcells[libcell_type].get_area();
-        }
+    if(part == PART::TOP){
+        area = tech_stack[0].libcells[libcell_type].get_area();
     }
     else{
-        if(tech_stack[0].tech_name == "TB"){
-            area = tech_stack[0].libcells[libcell_type].get_area();
-        }
-        else{
-            area = tech_stack[1].libcells[libcell_type].get_area();
-        }
+        if(tech_stack.size() !=1) area = tech_stack[1].libcells[libcell_type].get_area();
+        else area = tech_stack[0].libcells[libcell_type].get_area();
     }
     return;
 }
 
 partition_net::partition_net(){
-    Dist.A=0;
+    Dist.T=0;
     Dist.B=0;
 };
 
 partition_net::partition_net(string name){
     net_name = name ;
-    Dist.A=0;
+    Dist.T=0;
     Dist.B=0;
 };
 
 void partition_net::add_node(cell_node* c){
     connected_nodes.push_back(c);
     c->connected_nets.push_back(this);
-    if(c->part==PART::TECH_A) Dist.A+=1;
-    else if(c->part==PART::TECH_B) Dist.B+=1;
+    if(c->part==PART::TOP) Dist.T+=1;
+    else if(c->part==PART::BOTTOM) Dist.B+=1;
 };
 
 bool partition_net::is_cut(){
-    if(Dist.A==0 || Dist.B==0) return false;
+    if(Dist.T==0 || Dist.B==0) return false;
     else return true;
 };
 
 bool partition_net::is_critical(){
-    if(Dist.A==(1 || 0)) return true; 
+    if(Dist.T==(1 || 0)) return true; 
     else if(Dist.B == (1 || 0))return true; 
     else return false;
 };
 
 void partition_net::show_data(){
     cout << "net name:    " << net_name << "\n";
-    cout << "Distribution:(" << Dist.A << " " << Dist.B << ")\n";
+    cout << "Distribution:(" << Dist.T << " " << Dist.B << ")\n";
     cout << "connected_nodes:";
     for(vector<cell_node*>::iterator it=connected_nodes.begin(); it!=connected_nodes.end(); ++it){
         cout << (*it)->node_name << " ";
