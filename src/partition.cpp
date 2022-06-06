@@ -17,6 +17,7 @@ cell_node::cell_node(string name, string type){
         area = tech_stack[0].libcells[libcell_type].get_area();
     }
     else{
+        cout << "123" << endl;
         area = tech_stack[1].libcells[libcell_type].get_area();
     }
         

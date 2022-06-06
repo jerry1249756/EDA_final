@@ -186,7 +186,7 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){/*
     cout << "cutsize:" << cutsize << "\n";
 }
 
-void FM_algorithm(vector<cell_node>& v, vector<partition_net*> n){
+void FM_algorithm(vector<cell_node>& v, vector<partition_net*>& n){
     initialize_gain(v);
     initialize_area(v);
     print_current_state(v,n);

@@ -25,13 +25,15 @@ int main(int argc, char* argv[]){
     int Num_instance, Num_net, Num_net_pin;
 
     fin >> trash >> NumTechnologies;
-
+    tech_stack.reserve(NumTechnologies);
     for(int i = 0; i < NumTechnologies; i++){
         unordered_map<string,libcell> libcells;
         fin >> trash >> Tech_name >> Num_lib_cell;
+        libcells.reserve(Num_lib_cell);
         for(int j = 0; j < Num_lib_cell; j++){
             vector<pin> pin_stack;
             fin >> trash >> Libcell_name >> lib_x >> lib_y >> Num_pin;
+            pin_stack.reserve(Num_pin);
             for(int k = 0; k < Num_pin; k++){
                 fin >> trash >> pin_name >> pin_x >> pin_y;
                 point pin_point(pin_x,pin_y);
@@ -70,8 +72,6 @@ int main(int argc, char* argv[]){
     
     fin >> trash >> Num_net;
     for(int i = 0; i < Num_net; i++){
-        vector<string> instances;
-        vector<string> pins;
         fin >> trash >> net_name >> Num_net_pin;
         net net;
         net.Net_name = net_name;
@@ -91,24 +91,28 @@ int main(int argc, char* argv[]){
     //read file finish
 
     //partition
-    
-    vector<cell_node> nodes;
+    cout << "abc"<<endl;
+    vector<cell_node>* nodes = new vector<cell_node>;
     for(auto it = instances.begin(); it != instances.end(); ++it){
+        cout << "x" << endl;
         cell_node C(it->first, (it->second).libcell_type);
-        nodes.push_back(C);
+        cout << "y" << endl;
+        nodes->push_back(C);
+        cout << "z" << endl;
     }
+    cout << "abc" << endl;
     //cout << &nodes[0];
     //cout << endl;
 
     partition_net* temp_partition = new partition_net[Num_net];
 
-    vector<partition_net*> n;
+    vector<partition_net*>* n = new vector<partition_net*>;
     int* x = new int;
     *x = 0;
     for(auto it = nets.begin(); it != nets.end(); ++it){
         temp_partition[*x] = partition_net (it->first);
         //cout << temp_partition[*x].net_name << " ";
-        for(vector<cell_node>::iterator it1 = nodes.begin(); it1 != nodes.end(); ++it1){
+        for(vector<cell_node>::iterator it1 = nodes->begin(); it1 != nodes->end(); ++it1){
             for(vector<ip>::iterator it2 = (it->second).net_pin.begin(); it2 != (it->second).net_pin.end(); ++it2){
                 if(it2->INSTANCE == it1->node_name){
                     //cout << it2->INSTANCE << " ";
@@ -118,7 +122,7 @@ int main(int argc, char* argv[]){
             //cout << endl;
         }
         //cout << &(temp_partition[*x]) << " ";
-        n.push_back(&(temp_partition[*x]));
+        n->push_back(&(temp_partition[*x]));
         (*x)++;
     }
     //cout << endl;
@@ -128,13 +132,18 @@ int main(int argc, char* argv[]){
     nodes[1].show_data();
     nodes[0].show_data();
     */
-    nodes[500].show_data();
-    n[25]->show_data();
-    
+    (*nodes)[0].show_data();
+    (*n)[0]->show_data();
+
     die_area = (die_upper_x - die_lower_x) * (die_upper_y - die_lower_y);
-    FM_algorithm(nodes,n);
+    FM_algorithm(*nodes,*n);
+    
+
     delete x;
     delete[] temp_partition;
+    delete nodes;
+    delete n;
+
     fin.close();
     return 0;
 }
