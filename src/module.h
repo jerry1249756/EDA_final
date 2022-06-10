@@ -69,7 +69,7 @@ struct die_rows{
     int start_y;
     int row_length;
     int row_height;
-    int repeat_count;
+    unsigned int repeat_count;
 };
 
 class net{

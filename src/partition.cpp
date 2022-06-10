@@ -1,7 +1,7 @@
 #include "partition.h"
 
 extern vector<tech> tech_stack;
-extern int top_repeat_count, bottom_repeat_count;
+extern unsigned int top_repeat_count, bottom_repeat_count;
 
 cell_node::cell_node(string name, string type){
     node_name = name;
@@ -17,8 +17,8 @@ cell_node::cell_node(string name, string type){
         area = tech_stack[0].libcells[libcell_type].get_area();
     }
     else{
-        cout << "123" << endl;
-        area = tech_stack[1].libcells[libcell_type].get_area();
+        if(tech_stack.size() !=1) area = tech_stack[1].libcells[libcell_type].get_area();
+        else area = tech_stack[0].libcells[libcell_type].get_area();
     }
         
     state = LOCK_STATE::UNLOCKED;
@@ -64,7 +64,8 @@ void cell_node::update_area(){
         area = tech_stack[0].libcells[libcell_type].get_area();
     }
     else{
-        area = tech_stack[1].libcells[libcell_type].get_area();
+        if(tech_stack.size() !=1) area = tech_stack[1].libcells[libcell_type].get_area();
+        else area = tech_stack[0].libcells[libcell_type].get_area();
     }
     return;
 }

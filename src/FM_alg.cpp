@@ -1,7 +1,7 @@
 #include "FM_alg.h"
 //extern variables
-extern long long int die_area;
-extern int top_die_max_util, bottom_die_max_util;
+extern unsigned long long int die_area;
+extern unsigned int top_die_max_util, bottom_die_max_util;
 extern vector<tech> tech_stack;
 
 //I don't know where to define this!!!
@@ -35,7 +35,8 @@ bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
         }
     }
     else{
-        int swap_area = tech_stack[1].libcells[c->libcell_type].get_area();
+        int swap_area = (tech_stack.size() !=1) ? tech_stack[1].libcells[c->libcell_type].get_area()
+         : tech_stack[0].libcells[c->libcell_type].get_area();
         if(TOP_area + swap_area > die_area/100*top_die_max_util){
             //cout << c->node_name << " not valid\n";
             return false;
@@ -138,36 +139,17 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
     return;
 }
 
-void print_current_state(vector<cell_node>& v, vector<partition_net*> n){/*
-    vector<cell_node> A_part_nodes;
-    vector<cell_node> B_part_nodes;
-    vector<cell_node> locked_nodes;
-    for(vector<cell_node>::iterator it=v.begin(); it!=v.end(); ++it){
-        if((*it).part==PART::TOP) A_part_nodes.push_back((*it));
-        else B_part_nodes.push_back((*it));
-        if((*it).state==LOCK_STATE::LOCKED){
-            locked_nodes.push_back((*it));
+int get_cutsize(vector<partition_net*> n){
+    int cutsize=0;
+    for(vector<partition_net*>::iterator it=n.begin(); it!=n.end(); ++it){
+        if((*it)->is_cut()){
+            cutsize+=1;
         }
     }
-    
-    cout << "A part nodes: (total area: " << TOP_area << ")\n";
-    for(vector<cell_node>::iterator it=A_part_nodes.begin(); it!=A_part_nodes.end(); ++it){
-        cout << (*it).node_name << "(" << (*it).gain << ") ";
-    }
-    cout << "\nB part nodes: (total area: " << BOTTOM_area << ")\n";
-    for(vector<cell_node>::iterator it=B_part_nodes.begin(); it!=B_part_nodes.end(); ++it){
-        cout << (*it).node_name << "(" << (*it).gain << ") ";
-    }
-    
-    cout << "\nlocked nodes:";
-    for(vector<cell_node>::iterator it=locked_nodes.begin(); it!=locked_nodes.end(); ++it){
-        cout << (*it).node_name << " ";
-    }
-    cout << "\ncurrent net structure:\n";
-    for(vector<partition_net*>::iterator it=n.begin(); it!=n.end(); ++it){
-        cout << (*it)->net_name << " (" << (*it)->Dist.A << "," << (*it)->Dist.B << ")\n";
-    }
-    */
+    return cutsize;
+}
+
+void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
     vector<cell_node> TOP_part_nodes;
     vector<cell_node> BOTTOM_part_nodes;
     for(vector<cell_node>::iterator it=v.begin(); it!=v.end(); ++it){
@@ -175,18 +157,14 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){/*
         else BOTTOM_part_nodes.push_back((*it));
     }
     cout << "TOP part nodes: (total area: " << TOP_area << ")\n";
-    cout << "\nBOTTOM part nodes: (total area: " << BOTTOM_area << ")\n";
+    cout << "BOTTOM part nodes: (total area: " << BOTTOM_area << ")\n";
     cout << TOP_part_nodes.size() << " " << BOTTOM_part_nodes.size();
-    int cutsize=0;
-    for(vector<partition_net*>::iterator it=n.begin(); it!=n.end(); ++it){
-        if((*it)->is_cut()){
-            cutsize+=1;
-        }
-    }
-    cout << "cutsize:" << cutsize << "\n";
+    cout << "cutsize:" << get_cutsize(n) << "\n\n";
 }
 
 void FM_algorithm(vector<cell_node>& v, vector<partition_net*>& n){
+    int mincut = INT32_MAX;
+    cout << "partitioning...\n";
     initialize_gain(v);
     initialize_area(v);
     print_current_state(v,n);
@@ -198,9 +176,14 @@ void FM_algorithm(vector<cell_node>& v, vector<partition_net*>& n){
     }
     */
     while(m!=NULL){ //there is still valid node to move
-        //print_current_state(v,n);
-        swap_and_recalculate(v,m);
-        m = find_max_gain_node(v);
+        int cutsize = get_cutsize(n);
+        if(mincut > cutsize){
+            mincut = cutsize;
+            //print_current_state(v,n);
+            swap_and_recalculate(v,m);
+            m = find_max_gain_node(v);
+        }
+        else break;
     }
     print_current_state(v,n);
     return;
