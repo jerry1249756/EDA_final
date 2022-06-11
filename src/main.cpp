@@ -9,6 +9,7 @@ unsigned long long int die_area;
 unsigned int top_die_max_util, bottom_die_max_util;
 unsigned int top_repeat_count, bottom_repeat_count; 
 string top_die_tech, bottom_die_tech;
+int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
 
 int main(int argc, char* argv[]){
     //read file
@@ -16,8 +17,7 @@ int main(int argc, char* argv[]){
     //fstream fout(argv[2]);
     
     string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
-    int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y, die_lower_x, die_lower_y;
-    int die_upper_x, die_upper_y;
+    int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y;
     int top_start_x, top_start_y, top_row_length, top_row_height;  
     int bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height;  
     int terminal_size_x, terminal_size_y, terminal_spacing;

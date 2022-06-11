@@ -5,10 +5,9 @@
 #include <utility>
 #include <random>
 #include "module.h"
+#include "enum.h"
 
 using namespace std;
-
-enum class LOCK_STATE{UNLOCKED=0, LOCKED=1};
 
 typedef pair<int,int> distribution;
 #define T first 

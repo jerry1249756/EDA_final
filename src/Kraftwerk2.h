@@ -1,3 +1,6 @@
+#ifndef KRAFTWERK2_H
+#define KRAFTWERK2_H
+
 #include <iostream>
 #include "module.h"
 using namespace std;
@@ -31,3 +34,5 @@ class Kraftwerk2{
         int Parse_Inst_Name(string);
         void Generate_Connectivity_matrix(unordered_map<string, net>);
 };
+
+#endif
