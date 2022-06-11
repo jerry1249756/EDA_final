@@ -34,7 +34,7 @@ struct pin{
 class libcell{
     public:
         string cell_name;
-        vector<pin> pins;
+        unordered_map<string, pin> pins;
         libcell(){};
         libcell(int w,int h):width(w),height(h){};
         int width;
