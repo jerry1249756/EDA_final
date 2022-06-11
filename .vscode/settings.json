@@ -7,6 +7,9 @@
     "xstring": "cpp",
     "iostream": "cpp",
     "ostream": "cpp",
-    "xhash": "cpp"
+    "xhash": "cpp",
+    "system_error": "cpp",
+    "xmemory": "cpp",
+    "unordered_map": "cpp"
   }
 }

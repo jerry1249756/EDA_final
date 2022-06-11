@@ -21,22 +21,6 @@ partition.o: src/partition.cpp src/partition.h
 module.o: src/module.cpp src/module.h
 	$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
 
-dbg: bin/partition_dbg
-	@echo -n "make complete! (debug version)"
-
-# debug version
-bin/partition_dbg: main_dbg.o module_dbg.o FM_dbg.o partition_dbg.o 
-	$(CC) $(DBGFLAGS) main_dbg.o FM_dbg.o partition_dbg.o module_dbg.o -o bin/partition_dbg
-main_dbg.o: src/main.cpp  src/FM_alg.h src/partition.h src/module.h
-	$(CC) $(CFLAGS) $< -o $@
-
-FM_dbg.o: src/FM_alg.cpp src/FM_alg.h
-	$(CC) $(CFLAGS) $(DBGFLAGS) $< -o $@
-partition_dbg.o: src/partition.cpp src/partition.h
-	$(CC) $(CFLAGS) $(DBGFLAGS) $< -o $@
-module_dbg.o: src/module.cpp src/module.h
-	$(CC) $(CFLAGS) $(DBGFLAGS) $< -o $@
-
 
 # clean all the .o and executable files
 clean:

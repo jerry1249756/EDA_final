@@ -1,3 +1,6 @@
-*.o
+./FM.o
+./main_opt.o
+./module.o
+./partition.o
 ./bin/partition
 ./input.txt

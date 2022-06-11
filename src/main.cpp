@@ -1,5 +1,6 @@
 #include <fstream>
 #include "FM_alg.h"
+#include "module.h"
 
 using namespace std;
 
@@ -37,13 +38,13 @@ int main(int argc, char* argv[]){
         libcells.reserve(Num_lib_cell);
         for(int j = 0; j < Num_lib_cell; j++){
             fin >> trash >> Libcell_name >> lib_x >> lib_y >> Num_pin;
-            vector<pin> pin_stack;
+            unordered_map<string, pin> pin_stack;
             pin_stack.reserve(Num_pin);
             for(int k = 0; k < Num_pin; k++){
                 fin >> trash >> pin_name >> pin_x >> pin_y;
                 point pin_point(pin_x,pin_y);
                 pin cell_pin = {pin_name, pin_point};
-                pin_stack.push_back(cell_pin);
+                pin_stack[pin_name] = cell_pin;
             }
             libcell cell(lib_x, lib_y);
             cell.pins = pin_stack;
@@ -102,11 +103,10 @@ int main(int argc, char* argv[]){
         cell_node C(it.first, (it.second).libcell_type);
         nodes->push_back(C);
     }
-    //cout << &nodes[0];
-    //cout << endl;
-    partition_net* temp_partition = new partition_net[Num_net];
 
+    partition_net* temp_partition = new partition_net[Num_net];
     vector<partition_net*>* n = new vector<partition_net*>;
+
     int* x = new int;
     *x = 0;
     for(auto it = nets.begin(); it != nets.end(); ++it){
@@ -126,6 +126,7 @@ int main(int argc, char* argv[]){
     
     die_area = (die_upper_x - die_lower_x) * (die_upper_y - die_lower_y);
     FM_algorithm(*nodes,*n);
+
     
 
     delete x;
