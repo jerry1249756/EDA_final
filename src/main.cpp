@@ -3,17 +3,18 @@
 
 using namespace std;
 
-vector<tech> tech_stack;
+vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
 unsigned long long int die_area;
 unsigned int top_die_max_util, bottom_die_max_util;
 unsigned int top_repeat_count, bottom_repeat_count; 
+string top_die_tech, bottom_die_tech;
 
 int main(int argc, char* argv[]){
     //read file
     fstream fin(argv[1]);
     //fstream fout(argv[2]);
     
-    string trash, Tech_name, Libcell_name, pin_name, top_die_tech, bottom_die_tech, instance_name, net_name;
+    string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y, die_lower_x, die_lower_y;
     int die_upper_x, die_upper_y;
     int top_start_x, top_start_y, top_row_length, top_row_height;  

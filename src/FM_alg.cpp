@@ -28,15 +28,22 @@ void initialize_area(vector<cell_node>& v){
 
 bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
     if(c->part == PART::TOP){
-        int swap_area = tech_stack[0].libcells[c->libcell_type].get_area();
+        int swap_area;
+        if(top_die_tech == "TA")
+            swap_area = tech_stack[0].libcells[c->libcell_type].get_area();
+        else if(top_die_tech == "TB")
+            swap_area = tech_stack[1].libcells[c->libcell_type].get_area();
         if(BOTTOM_area + swap_area > die_area/100*bottom_die_max_util){
             //cout << c->node_name << " not valid\n";
             return false;
         }
     }
     else{
-        int swap_area = (tech_stack.size() !=1) ? tech_stack[1].libcells[c->libcell_type].get_area()
-         : tech_stack[0].libcells[c->libcell_type].get_area();
+        int swap_area;
+        if(bottom_die_tech == "TA")
+            swap_area = tech_stack[0].libcells[c->libcell_type].get_area()
+        else if(bottom_die_tech == "TB")    
+            swap_area = tech_stack[1].libcells[c->libcell_type].get_area();
         if(TOP_area + swap_area > die_area/100*top_die_max_util){
             //cout << c->node_name << " not valid\n";
             return false;
