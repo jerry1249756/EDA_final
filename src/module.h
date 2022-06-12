@@ -48,6 +48,7 @@ class instance{
         point instance_pos;
         string libcell_type;
         TECH tech;
+        PART part;
         void set_pos(point);
 };
 

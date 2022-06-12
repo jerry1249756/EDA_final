@@ -126,8 +126,23 @@ int main(int argc, char* argv[]){
     
     die_area = (die_upper_x - die_lower_x) * (die_upper_y - die_lower_y);
     FM_algorithm(*nodes,*n);
-
-    
+    for(vector<cell_node>::iterator it = nodes->begin(); it != nodes->end(); ++it){
+        string name = it->node_name; 
+        if(it->part == PART::TOP){
+            instances[name].part = PART::TOP;
+            if(top_die_tech == "TA")
+                instances[name].tech = TECH::TECH_A;
+            else
+                instances[name].tech = TECH::TECH_B;
+        }
+        else{
+            instances[name].part = PART::BOTTOM;
+            if(bottom_die_tech == "TA")
+                instances[name].tech = TECH::TECH_A;
+            else
+                instances[name].tech = TECH::TECH_B;
+        }
+    }
 
     delete x;
     delete[] temp_partition;
