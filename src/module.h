@@ -14,6 +14,8 @@ typedef pair<string,string> ip;
 #define INSTANCE first 
 #define PIN second
 
+class net;
+
 class point{
     public:
         int x;
@@ -48,6 +50,8 @@ class instance{
         instance(string t):libcell_type(t){};
         point instance_pos;
         string libcell_type;
+        vector<net*> connected_nets;
+        PART part; 
         TECH tech;
         void set_pos(point);
 };
@@ -77,8 +81,10 @@ class net{
         net(){};
         string Net_name;
         vector<ip> net_pin;
+        void add_ip(string, string, unordered_map<string, instance>&);
 };
 
 int manhat_dist(point, point);
-int split1(string);
+int split_num(string);
+pair<string, string> split_string(string&);
 #endif

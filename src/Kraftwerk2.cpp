@@ -1,54 +1,64 @@
 #include "Kraftwerk2.h"
 
-Matrix::Matrix(int n){
+Vector::Vector(int n){
+    data.reserve(n);
+    for(int i=0;i<n; i++){
+        data[i] = 0;
+    }
     size = n;
-    data = new float* [n];
-    for(int i=0; i<n; i++){
-        data[i] = new float[n];
-    }
-    for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++){
-            data[i][j]=0;
-        }
-    }
 }
 
-Matrix::Matrix(const Matrix& m1){//copy constructor
-    size = m1.size;
-    data = new float* [size]; //allocate memory
-    for(int i=0; i<size; i++){
-        data[i] = new float[size];
+Vector::Vector(const Vector& v1){
+    int n = v1.size;
+    data.reserve(n);
+    for(int i=0;i<n; i++){
+        data[i] = v1.data[i];
     }
-    for(int i=0; i<size; i++){  //copy
-        for(int j=0; j<size; j++){
+    size = n;
+}
+
+void Vector::print_data(){
+    for(int i=0; i<size; i++){
+        cout << data[i] << " ";
+    }
+    cout << "\n";
+}
+
+
+Matrix::Matrix(int n){
+    data.reserve(n);
+    for(int i=0; i<n; i++){
+        data[i].reserve(n);
+    }
+    for(int i=0;i<n; i++){
+        for(int j=0; j<n; j++){
+            data[i][j] = 0;
+        }
+    }
+    size = n;
+}
+
+Matrix::Matrix(const Matrix& m1){
+    int n = m1.size;
+    data.reserve(n);
+    for(int i=0; i<n; i++){
+        data[i].reserve(n);
+    }
+    for(int i=0;i<n; i++){
+        for(int j=0; j<n; j++){
             data[i][j] = m1.data[i][j];
         }
     }
-
+    size = n;
 }
-Matrix::~Matrix(){
+
+void Matrix::exchange_rows(int a, int b){
     for(int i=0; i<size; i++){
-        delete[] data[i];
+        double temp = data[a][i];
+        data[a][i] = data[b][i];
+        data[b][i] = temp;
     }
-    delete[] data;
-}
-
-void Matrix::LU_decomp(Matrix& L, Matrix& U){
-    for(int k=0; k<size; k++){
-        L.data[k][k] = 1; 
-    }
-    for(int k=0; k<size; k++){
-        U.data[k][k] = data[k][k];
-        for(int i=k+1; i<size; i++){
-            L.data[i][k] = data[i][k]/data[k][k];
-            U.data[k][i] = data[k][i];
-        } 
-        for(int i=k+1; i<size; i++){
-            for(int j=k+1; j<size; j++){
-                data[i][j] -= L.data[i][k]* U.data[k][j];
-            }
-        }
-    }
+    return;
 }
 
 void Matrix::print_data(){
@@ -61,7 +71,87 @@ void Matrix::print_data(){
     cout << "\n";
 }
 
-Kraftwerk2::Kraftwerk2(int n){
+void Matrix::PLU_decomposition(Matrix& L, Matrix& U, Matrix& P){ //PA=LU
+    //L U will be modified after this, and outputs a permutation P
+    int n=size; 
+    for(int i=0; i<n; i++){
+        P.data[i][i] = 1;
+    }
+    for(int k=0; k<n; k++){
+        double p=0;
+        int k_prime = k;
+        for(int i=k; i<n; i++){
+            if(abs(data[i][k])>p){
+                p = abs(data[i][k]);
+                k_prime = i;
+            }
+        }
+        if(p==0) cout << "Error in PLU_Decomposition: singular matrix\n";
+        else{
+            P.exchange_rows(k, k_prime);
+            exchange_rows(k, k_prime);  
+        }
+        for(int i=k+1; i<n; i++){
+            data[i][k] = data[i][k] /data[k][k];
+            for(int j=k+1; j<n; j++){
+                data[i][j] = data[i][j] - data[i][k]*data[k][j];
+            } 
+        }
+    }
+    for(int i=0; i<n;i++){
+        for(int j=0; j<n; j++){
+            if(i>j)L.data[i][j] = data[i][j];
+            else{
+                if(i==j) L.data[i][j] = 1;           
+                U.data[i][j] = data[i][j];
+            }
+        }
+    }
+    return;
+}
+
+Vector Matrix_Vector_Prod(Matrix A, Vector v){ //A(n*n) B(n*1) output C(n*1)
+    int n = A.size;
+    Vector C(n);
+    cout << "hi2";
+    for(int i=0; i<n; i++){
+        cout << i;
+        for(int k=0; k<n; k++){
+            C.data[i] += A.data[i][k]*v.data[k]; 
+        }
+    }
+    return C;
+}
+
+void solve_linear_system(Matrix& P, Matrix& L, Matrix& U, Vector& b, Vector& x){ //PAx=Pb -> LUx = Pb
+    //P,L,U are size of (n,n), b is of (n,1)
+    int n = b.size;
+    Vector b_prime(n), y(n);
+    b.print_data();
+    for(int i=0; i<n; i++){
+        for(int k=0; k<n; k++){
+            b_prime.data[i] += P.data[i][k]*b.data[k]; 
+        }
+    }
+    
+    b_prime = Matrix_Vector_Prod(P, b);
+    for(int i=0; i<n; i++){
+        y.data[i] = b_prime.data[i];
+        for(int j=0; j<=i-1; j++){
+            y.data[i] -= L.data[i][j]*y.data[j];
+        } 
+    }
+    for(int i=n-1; i>=0; i--){
+        double sum = 0;
+        for(int j=i+1; j<n; j++){
+            sum += U.data[i][j]*x.data[j];
+        }
+        x.data[i] = (y.data[i] - sum)/U.data[i][i]; 
+    }
+    return;
+}
+
+Kraftwerk2::Kraftwerk2(int n){ //n: num instances
     Connectivity_mat = new Matrix(n);
 }
 
@@ -73,11 +163,10 @@ void Kraftwerk2::Generate_Connectivity_matrix(unordered_map<string, net> map){
     for(auto& it : map){
         int n =it.second.net_pin.size();
         for(int i=0; i<n; i++){
-            for(int j = i+1; j<n; j++){
-                Connectivity_mat->data[i][j]+=1;
-                Connectivity_mat->data[j][i]+=1;
+            for(int j=i+1; j<n; j++){
+                Connectivity_mat[i][j] +=1 ;
+                Connectivity_mat[j][i] +=1 ;
             }
         }
     }
 }
-

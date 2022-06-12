@@ -159,7 +159,7 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
     cout << "TOP part nodes: (total area: " << TOP_area << ")\n";
     cout << "BOTTOM part nodes: (total area: " << BOTTOM_area << ")\n";
     cout << TOP_part_nodes.size() << " " << BOTTOM_part_nodes.size();
-    cout << "cutsize:" << get_cutsize(n) << "\n\n";
+    cout << " cutsize: " << get_cutsize(n) << "\n\n";
 }
 
 void FM_algorithm(vector<cell_node>& v, vector<partition_net*>& n){
