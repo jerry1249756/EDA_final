@@ -1,8 +1,5 @@
 #include "partition.h"
 
-extern vector<tech> tech_stack;
-extern unsigned int top_repeat_count, bottom_repeat_count;
-
 cell_node::cell_node(string name, string type){
     node_name = name;
     libcell_type = type;
@@ -14,11 +11,16 @@ cell_node::cell_node(string name, string type){
     part = (temp < 100*top_repeat_count*top_repeat_count/(top_repeat_count*top_repeat_count+bottom_repeat_count*bottom_repeat_count))? PART::TOP : PART::BOTTOM; 
     
     if(part == PART::TOP){
-        area = tech_stack[0].libcells[libcell_type].get_area();
+        if(top_die_tech == "TA")
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        else if(top_die_tech == "TB")
+            area = tech_stack[1].libcells[libcell_type].get_area();
     }
     else{
-        if(tech_stack.size() !=1) area = tech_stack[1].libcells[libcell_type].get_area();
-        else area = tech_stack[0].libcells[libcell_type].get_area();
+        if(bottom_die_tech == "TA")
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        else if(bottom_die_tech == "TB")
+            area = tech_stack[1].libcells[libcell_type].get_area();
     }
         
     state = LOCK_STATE::UNLOCKED;
@@ -61,11 +63,16 @@ void cell_node::show_data(){
 
 void cell_node::update_area(){
     if(part == PART::TOP){
-        area = tech_stack[0].libcells[libcell_type].get_area();
+        if(top_die_tech == "TA")
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        else if(top_die_tech == "TB")
+            area = tech_stack[1].libcells[libcell_type].get_area();
     }
     else{
-        if(tech_stack.size() !=1) area = tech_stack[1].libcells[libcell_type].get_area();
-        else area = tech_stack[0].libcells[libcell_type].get_area();
+        if(bottom_die_tech == "TA")
+            area = tech_stack[0].libcells[libcell_type].get_area();
+        else if(bottom_die_tech == "TB")
+            area = tech_stack[1].libcells[libcell_type].get_area();
     }
     return;
 }

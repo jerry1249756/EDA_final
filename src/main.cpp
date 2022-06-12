@@ -8,24 +8,20 @@ vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists
 unsigned long long int die_area;
 unsigned int top_die_max_util, bottom_die_max_util;
 unsigned int top_repeat_count, bottom_repeat_count; 
+string top_die_tech, bottom_die_tech;
+int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
 
 int main(int argc, char* argv[]){
     //read file
     fstream fin(argv[1]);
     //fstream fout(argv[2]);
     
-    string trash, Tech_name, Libcell_name, pin_name, top_die_tech, bottom_die_tech, instance_name, net_name;
-    int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y, die_lower_x, die_lower_y;
-    int die_upper_x, die_upper_y;
+    string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
+    int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y;
     int top_start_x, top_start_y, top_row_length, top_row_height;  
     int bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height;  
     int terminal_size_x, terminal_size_y, terminal_spacing;
     int Num_instance, Num_net, Num_net_pin;
-
-    unordered_map<string, instance> instances;
-    unordered_map<string, net*> nets;
-    instances.reserve(Num_instance);
-    nets.reserve(Num_net);
 
     fin >> trash >> NumTechnologies;
     tech_stack.reserve(NumTechnologies);
@@ -67,7 +63,9 @@ int main(int argc, char* argv[]){
     fin >> trash >> terminal_size_x >> terminal_size_y;
     fin >> trash >> terminal_spacing;
     fin >> trash >> Num_instance;
-
+    unordered_map<string, instance> instances;
+    unordered_map<string, net*> nets;
+    instances.reserve(Num_instance);
     vector<cell_node>* nodes = new vector<cell_node>; 
     nodes->reserve(Num_instance);
 
@@ -80,23 +78,24 @@ int main(int argc, char* argv[]){
     }
     
     fin >> trash >> Num_net;
+    nets.reserve(Num_net);
     partition_net* temp_partition = new partition_net[Num_net];
     vector<partition_net*>* n = new vector<partition_net*>;
-    
+    net* Net = new net[Num_net];
+
     for(int i = 0; i < Num_net; i++){
         fin >> trash >> net_name >> Num_net_pin;
         temp_partition[i] = partition_net(net_name); //assign net name 
-        net* Net = new net;
-        Net->Net_name = net_name;
+        Net[i].Net_name = net_name;
         for(int j = 0; j < Num_net_pin; j++){
             string temp;
             fin >> trash >> temp;
             pair<string, string> p = split_string(temp);
-            Net->add_ip(p.first, p.second, instances);
+            Net[i].add_ip(p.first, p.second, instances);
             int num = stoi(p.first.substr(1))-1;
             temp_partition[i].add_node(&(nodes->at(num)));
         }
-        nets[net_name] = Net;
+        nets[net_name] = &(Net[i]);
         n->push_back(&(temp_partition[i]));
     }
     
@@ -125,6 +124,7 @@ int main(int argc, char* argv[]){
     delete nodes;
     delete n;
     
+    delete[] Net;
     fin.close();
     return 0;
 }

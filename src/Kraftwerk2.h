@@ -1,3 +1,6 @@
+#ifndef KRAFTWERK2_H
+#define KRAFTWERK2_H
+
 #include <iostream>
 #include <cmath>
 #include <vector>

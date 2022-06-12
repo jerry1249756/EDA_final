@@ -113,7 +113,6 @@ void Matrix::PLU_decomposition(Matrix& L, Matrix& U, Matrix& P){ //PA=LU
 Vector Matrix_Vector_Prod(Matrix A, Vector v){ //A(n*n) B(n*1) output C(n*1)
     int n = A.size;
     Vector C(n);
-    cout << "hi2";
     for(int i=0; i<n; i++){
         cout << i;
         for(int k=0; k<n; k++){
