@@ -91,7 +91,6 @@ void Kraftwerk2::calc_gradient(vector<vector<float>> phi, int delta, unordered_m
 
 void Kraftwerk2::update_pos_diff(Vector demand){
     Matrix C_x(size), C_y(size), P_x(size), L_x(size), U_x(size), P_y(size), L_y(size), U_y(size);
-
     C_x = Matrix_Addition(*connectivity_mat, *move_force_mat_x);
     C_y = Matrix_Addition(*connectivity_mat, *move_force_mat_y);
     C_x.PLU_decomposition(L_x, U_x, P_x);
@@ -103,3 +102,5 @@ void Kraftwerk2::update_pos_diff(Vector demand){
 void Kraftwerk2::Kraftwerk2_global_placement(){
 
 }
+
+//init_penalty
