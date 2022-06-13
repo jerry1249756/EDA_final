@@ -10,6 +10,13 @@
     "xhash": "cpp",
     "system_error": "cpp",
     "xmemory": "cpp",
-    "unordered_map": "cpp"
-  }
+    "unordered_map": "cpp",
+    "random": "cpp",
+    "cstdlib": "cpp",
+    "cmath": "cpp",
+    "dense": "cpp",
+    "xutility": "cpp",
+    "string": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
 }

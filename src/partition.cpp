@@ -1,9 +1,5 @@
 #include "partition.h"
 
-extern vector<tech> tech_stack;
-extern unsigned int top_repeat_count, bottom_repeat_count;
-extern string top_die_tech, bottom_die_tech;
-
 cell_node::cell_node(string name, string type){
     node_name = name;
     libcell_type = type;

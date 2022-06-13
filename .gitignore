@@ -1,4 +1,5 @@
 ./FM.o
+./.vscode/
 ./main_opt.o
 ./module.o
 ./partition.o

@@ -1,7 +1,8 @@
 #include <fstream>
 #include "FM_alg.h"
 #include "module.h"
-
+#include "Kraftwerk2_utility.h"
+#include "Kraftwerk2.h"
 using namespace std;
 
 vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
@@ -23,14 +24,9 @@ int main(int argc, char* argv[]){
     int terminal_size_x, terminal_size_y, terminal_spacing;
     int Num_instance, Num_net, Num_net_pin;
 
-    unordered_map<string, instance> instances;
-    unordered_map<string, net> nets;
-
-    instances.reserve(Num_instance);
-    nets.reserve(Num_net);
-
     fin >> trash >> NumTechnologies;
     tech_stack.reserve(NumTechnologies);
+
     for(int i = 0; i < NumTechnologies; i++){
         unordered_map<string,libcell> libcells;
         libcells.reserve(Num_lib_cell);
@@ -65,67 +61,48 @@ int main(int argc, char* argv[]){
     die_rows bottom_die_rows = {bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height, bottom_repeat_count};
 
     fin >> trash >> top_die_tech >> trash >> bottom_die_tech;
-
     fin >> trash >> terminal_size_x >> terminal_size_y;
     fin >> trash >> terminal_spacing;
-
     fin >> trash >> Num_instance;
+    unordered_map<string, instance> instances;
+    unordered_map<string, net*> nets;
+    instances.reserve(Num_instance);
+    vector<cell_node>* nodes = new vector<cell_node>; 
+    nodes->reserve(Num_instance);
+
     for(int i = 0; i < Num_instance; i++){
         fin >> trash >> instance_name >> Libcell_name;
         instance c(Libcell_name);
         instances[instance_name] = c;
-    }
-
-    fin >> trash >> Num_net;
-    for(int i = 0; i < Num_net; i++){
-        fin >> trash >> net_name >> Num_net_pin;
-        net net;
-        net.Net_name = net_name;
-        for(int j = 0; j < Num_net_pin; j++){
-            ip temp_pair;
-            string temp;
-            fin >> trash >> temp;
-            int temp2 = split1(temp);
-            string c = temp.substr(0,temp2);
-            temp.erase(0,temp2+1);
-            temp_pair.INSTANCE = c;
-            temp_pair.PIN = temp;
-            net.net_pin.push_back(temp_pair);
-        }
-        nets[net_name] = net;
-    }
-    //read file finish
-    
-    //partition
-    vector<cell_node>* nodes = new vector<cell_node>; // use new
-    nodes->reserve(Num_instance);
-    for(auto& it : instances){
-        cell_node C(it.first, (it.second).libcell_type);
+        cell_node C(instance_name, Libcell_name);
         nodes->push_back(C);
     }
-
+    
+    fin >> trash >> Num_net;
+    nets.reserve(Num_net);
     partition_net* temp_partition = new partition_net[Num_net];
     vector<partition_net*>* n = new vector<partition_net*>;
+    net* Net = new net[Num_net];
 
-    int* x = new int;
-    *x = 0;
-    for(auto it = nets.begin(); it != nets.end(); ++it){
-        temp_partition[*x] = partition_net (it->first);
-        //cout << temp_partition[*x].net_name << " ";
-        for(vector<cell_node>::iterator it1 = nodes->begin(); it1 != nodes->end(); ++it1){
-            for(vector<ip>::iterator it2 = (it->second).net_pin.begin(); it2 != (it->second).net_pin.end(); ++it2){
-                if(it2->INSTANCE == it1->node_name){
-                    temp_partition[*x].add_node(&(*it1));
-                    
-                }
-            }
+    for(int i = 0; i < Num_net; i++){
+        fin >> trash >> net_name >> Num_net_pin;
+        temp_partition[i] = partition_net(net_name); //assign net name 
+        Net[i].Net_name = net_name;
+        for(int j = 0; j < Num_net_pin; j++){
+            string temp;
+            fin >> trash >> temp;
+            pair<string, string> p = split_string(temp);
+            Net[i].add_ip(p.first, p.second, instances);
+            int num = stoi(p.first.substr(1))-1;
+            temp_partition[i].add_node(&(nodes->at(num)));
         }
-        n->push_back(&(temp_partition[*x]));
-        (*x)++;
+        nets[net_name] = &(Net[i]);
+        n->push_back(&(temp_partition[i]));
     }
     
     die_area = (die_upper_x - die_lower_x) * (die_upper_y - die_lower_y);
     FM_algorithm(*nodes,*n);
+    //assign back to main data structure
     for(vector<cell_node>::iterator it = nodes->begin(); it != nodes->end(); ++it){
         string name = it->node_name; 
         if(it->part == PART::TOP){
@@ -144,11 +121,63 @@ int main(int argc, char* argv[]){
         }
     }
 
-    delete x;
     delete[] temp_partition;
     delete nodes;
     delete n;
 
+    //test
+    Kraftwerk2 k(Num_instance,3,instances);
+    k.gen_connectivity_matrix(nets);
+    k.print_mat();
+
+    k.get_solution(instances);
+    int die_width = die_upper_x - die_lower_x;
+    vector<vector<float>> D;
+    vector<vector<float>> phi;
+    D.reserve(top_repeat_count);
+    phi.reserve(top_repeat_count);
+    for(int i = 0; i < D.capacity(); i++){
+        vector<float> temp;
+        vector<float> temp2;
+        temp.reserve(die_width/top_row_height);
+        temp2.reserve(die_width/top_row_height);
+        for(int j = 0; j < temp.capacity(); j++){
+            temp.push_back(0);
+            temp2.push_back(0);
+        }
+        D.push_back(temp);
+        phi.push_back(temp2);
+    }
+
+    for(auto it = instances.begin(); it != instances.end(); ++it){
+        cout << it->second.libcell_type << ": ";
+        if(it->second.tech == TECH::TECH_A) cout << "TA ";
+        else cout << "TB ";
+        if(it->second.part == PART::TOP) cout << "top ";
+        else cout << "bottom ";
+        cout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
+        cout << endl;
+    }
+    cal_D(instances,D,PART::TOP,top_row_height,k.demand_x);
+    for(int i = 0; i < D.size(); i++){
+        for(int j = 0; j < D[i].size(); j++){
+            cout << "i= " << i;
+            cout << " j= " << j << "  ";
+            cout << D[i][j] << endl;
+        }
+    }
+    cal_phi(D,phi,top_row_height,10);
+    k.calc_gradient(phi,top_row_height,instances);
+    cout << "cal phi: " << endl;
+    for(int i = 0; i < phi.size(); i++){
+        for(int j = 0; j < phi[i].size(); j++){
+            cout << "i= " << i;
+            cout << " j= " << j << "  ";
+            cout << phi[i][j] << endl;
+        }
+    }
+
+    delete[] Net;
     fin.close();
     return 0;
 }

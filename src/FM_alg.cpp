@@ -1,8 +1,4 @@
 #include "FM_alg.h"
-//extern variables
-extern unsigned long long int die_area;
-extern unsigned int top_die_max_util, bottom_die_max_util;
-extern vector<tech> tech_stack;
 
 //I don't know where to define this!!!
 long long int TOP_area=0, BOTTOM_area=0;
@@ -41,7 +37,7 @@ bool check_swap_area_constraint(vector<cell_node>& v, cell_node* c){
     else{
         int swap_area;
         if(bottom_die_tech == "TA")
-            swap_area = tech_stack[0].libcells[c->libcell_type].get_area()
+            swap_area = tech_stack[0].libcells[c->libcell_type].get_area();
         else if(bottom_die_tech == "TB")    
             swap_area = tech_stack[1].libcells[c->libcell_type].get_area();
         if(TOP_area + swap_area > die_area/100*top_die_max_util){
@@ -166,7 +162,7 @@ void print_current_state(vector<cell_node>& v, vector<partition_net*> n){
     cout << "TOP part nodes: (total area: " << TOP_area << ")\n";
     cout << "BOTTOM part nodes: (total area: " << BOTTOM_area << ")\n";
     cout << TOP_part_nodes.size() << " " << BOTTOM_part_nodes.size();
-    cout << "cutsize:" << get_cutsize(n) << "\n\n";
+    cout << " cutsize: " << get_cutsize(n) << "\n\n";
 }
 
 void FM_algorithm(vector<cell_node>& v, vector<partition_net*>& n){
