@@ -1,7 +1,8 @@
 #include <fstream>
 #include "FM_alg.h"
 #include "module.h"
-//#include "Kraftwerk2.h"
+#include "Kraftwerk2_utility.h"
+#include "Kraftwerk2.h"
 using namespace std;
 
 vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
@@ -10,6 +11,7 @@ unsigned int top_die_max_util, bottom_die_max_util;
 unsigned int top_repeat_count, bottom_repeat_count; 
 string top_die_tech, bottom_die_tech;
 int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
+int top_row_height, bottom_row_height;
 
 int main(int argc, char* argv[]){
     //read file
@@ -18,7 +20,7 @@ int main(int argc, char* argv[]){
     
     string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y;
-    int top_start_x, top_start_y, top_row_length, top_row_height;  
+    int top_start_x, top_start_y, top_row_length;  
     int bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height;  
     int terminal_size_x, terminal_size_y, terminal_spacing;
     int Num_instance, Num_net, Num_net_pin;
@@ -119,10 +121,24 @@ int main(int argc, char* argv[]){
                 instances[name].tech = TECH::TECH_B;
         }
     }
-    
+
     delete[] temp_partition;
     delete nodes;
     delete n;
+
+    //test
+    Kraftwerk2 k1(Num_instance,instances, PART::TOP);
+    k1.print_solution();
+    k1.get_solution(instances);
+    k1.gen_connectivity_matrix(nets);
+    int delta = top_row_height;
+    //k1.print_mat();
+    //k1.update_pos_diff();
+
+    
+    k1.Kraftwerk2_global_placement(instances);
+    k1.print_solution();
+    //k.get_solution(instances);
     
     delete[] Net;
     fin.close();

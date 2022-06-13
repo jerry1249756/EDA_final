@@ -47,7 +47,7 @@ class instance{
     public: 
         instance(){};
         instance(string t):libcell_type(t){};
-        point instance_pos;
+        point instance_pos = point(0,0);
         string libcell_type;
         vector<net*> connected_nets;
         PART part; 

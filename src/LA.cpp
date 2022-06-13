@@ -110,41 +110,38 @@ void Matrix::PLU_decomposition(Matrix& L, Matrix& U, Matrix& P){ //PA=LU
     return;
 }
 
-Matrix Matrix_Addition(Matrix A, Matrix B){
+void Matrix_Addition(Matrix& A, Matrix& B, Matrix& C){
     int n=A.size;
-    Matrix C(n);
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++){
             C.data[i][j] = A.data[i][j] + B.data[i][j];
         }
     }
-    return C;
+    return ;
 }
 
-Vector Matrix_Vector_Prod(Matrix A, Vector v){ //A(n*n) B(n*1) output C(n*1)
+void Matrix_Vector_Prod(Matrix& A, Vector& v, Vector& c){ //A(n*n) B(n*1) output C(n*1)
     int n = A.size;
-    Vector C(n);
     for(int i=0; i<n; i++){
-        cout << i;
+        c.data[i] = 0;
         for(int k=0; k<n; k++){
-            C.data[i] += A.data[i][k]*v.data[k]; 
+            c.data[i] = A.data[i][k]*v.data[k]; 
         }
     }
-    return C;
+    return;
 }
 
 void solve_linear_system(Matrix& P, Matrix& L, Matrix& U, Vector& b, Vector& x){ //PAx=Pb -> LUx = Pb
     //P,L,U are size of (n,n), b is of (n,1)
     int n = b.size;
     Vector b_prime(n), y(n);
-    b.print_data();
     for(int i=0; i<n; i++){
         for(int k=0; k<n; k++){
             b_prime.data[i] += P.data[i][k]*b.data[k]; 
         }
     }
     
-    b_prime = Matrix_Vector_Prod(P, b);
+    Matrix_Vector_Prod(P, b, b_prime);
     for(int i=0; i<n; i++){
         y.data[i] = b_prime.data[i];
         for(int j=0; j<=i-1; j++){

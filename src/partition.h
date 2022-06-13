@@ -5,7 +5,6 @@
 #include <utility>
 #include <random>
 #include "module.h"
-#include "enum.h"
 
 using namespace std;
 

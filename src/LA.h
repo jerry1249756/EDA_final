@@ -27,8 +27,8 @@ class Matrix{
         vector<vector<double>> data;
 };
 
-Matrix Matrix_Addition(Matrix, Matrix);
-Vector Matrix_Vector_Prod(Matrix, Vector);
-void solve_linear_system(Matrix&, Matrix&, Matrix&, Vector&, Vector&);
+void Matrix_Addition(Matrix& A, Matrix& B, Matrix& C);
+void Matrix_Vector_Prod(Matrix& A, Vector& v, Vector& c);
+void solve_linear_system(Matrix& P, Matrix& L, Matrix& U, Vector& b, Vector& x);
 
 #endif

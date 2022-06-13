@@ -1,13 +1,35 @@
 #include "Kraftwerk2.h"
 
-Kraftwerk2::Kraftwerk2(int n, int times, unordered_map<string, instance>& map){ //n: num instances
+Kraftwerk2::Kraftwerk2(int n, unordered_map<string, instance>& map, PART part){ //n: num instances
     connectivity_mat = new Matrix(n);
     move_force_mat_x = new Matrix(n);
     move_force_mat_y = new Matrix(n);
-    demand_x = new Vector(n);
-    demand_y = new Vector(n);
+    demand = new Vector(n);
     solution_x = new Vector(n);
     solution_y = new Vector(n);
+    this->part = part;
+    //initial the D and phi array
+    int die_width = die_upper_x - die_lower_x;
+    if(part == PART::TOP){
+        D.reserve(top_repeat_count);
+        phi.reserve(top_repeat_count);
+    } else{
+        D.reserve(bottom_repeat_count);
+        phi.reserve(bottom_repeat_count);
+    } 
+    for(int i = 0; i < D.capacity(); i++){
+        vector<float> temp;
+        vector<float> temp2;
+        temp.reserve(die_width/top_row_height);
+        temp2.reserve(die_width/top_row_height);
+        for(int j = 0; j < temp.capacity(); j++){
+            temp.push_back(0);
+            temp2.push_back(0);
+        }
+        D.push_back(temp);
+        phi.push_back(temp2);
+    }
+
     //randomly assign position while maintaining the instances inside the die.
     for(auto& it : map){
         int n = parse_inst_name(it.first);
@@ -28,15 +50,13 @@ Kraftwerk2::Kraftwerk2(int n, int times, unordered_map<string, instance>& map){ 
         solution_y->data[n] = distrib_y(gen);
     }
     size = n;
-    iter_param = times;
 }
 
 Kraftwerk2::~Kraftwerk2(){ 
     delete connectivity_mat;
     delete move_force_mat_x;
     delete move_force_mat_y;
-    delete demand_x;
-    delete demand_y;
+    delete demand;
     delete solution_x;
     delete solution_y;
 }
@@ -54,6 +74,7 @@ void Kraftwerk2::get_solution(unordered_map<string, instance>& map){
 }
 
 void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
+    cout << "generating connectivity matrix ..\n";
     for(auto& it : map){
         int n =it.second->net_pin.size();
         for(int i=0; i<n; i++){
@@ -69,7 +90,17 @@ void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
 }
 
 void Kraftwerk2::print_mat(){
+    cout << "connectivity mat: \n"; 
     connectivity_mat->print_data();
+    cout << " move_force_mat_x: \n"; 
+    move_force_mat_x->print_data();
+    return;
+}
+
+void Kraftwerk2::print_solution(){
+    cout << "current solution: \n";
+    solution_x -> print_data();
+    solution_y -> print_data();
     return;
 }
 
@@ -78,7 +109,17 @@ void Kraftwerk2::print_mat(){
 // x,y: the point of the instances forming a vector, which will later be stored in solution.
 
 // Note that D(i,j) represents the actual coordinate point at h(1/2+i, 1/2+j)
-void Kraftwerk2::calc_gradient(vector<vector<float>> phi, int delta, unordered_map<string, instance> map){ 
+void Kraftwerk2::calc_gradient(int delta, unordered_map<string, instance> map){ 
+    for(int j=0; j<D.size(); j++){
+        for(int k=0; k<D[j].size(); k++){
+            D[j][k] = 0;
+            phi[j][k] = 0;
+        }
+    }
+    cal_D(map, D, part, delta, demand);
+    demand->print_data();
+    cal_phi(D, phi, delta, 10);
+    
     for(auto& it : map){
         int n = parse_inst_name(it.first);
         //(x,y) is in (i,j) , (i+1,j+1)
@@ -89,18 +130,35 @@ void Kraftwerk2::calc_gradient(vector<vector<float>> phi, int delta, unordered_m
     }
 }
 
-void Kraftwerk2::update_pos_diff(Vector demand){
+void Kraftwerk2::update_pos_diff(){
     Matrix C_x(size), C_y(size), P_x(size), L_x(size), U_x(size), P_y(size), L_y(size), U_y(size);
-    C_x = Matrix_Addition(*connectivity_mat, *move_force_mat_x);
-    C_y = Matrix_Addition(*connectivity_mat, *move_force_mat_y);
+    Matrix_Addition(*connectivity_mat, *move_force_mat_x, C_x);
+    Matrix_Addition(*connectivity_mat, *move_force_mat_y, C_y);
     C_x.PLU_decomposition(L_x, U_x, P_x);
     C_y.PLU_decomposition(L_y, U_y, P_y);
-
-
+    Vector b_x(size), b_y(size), delta_x(size), delta_y(size);
+    Matrix_Vector_Prod(*move_force_mat_x, *demand, b_x);
+    Matrix_Vector_Prod(*move_force_mat_y, *demand, b_y);
+    solve_linear_system(P_x, L_x, U_x, b_x, delta_x);
+    solve_linear_system(P_y, L_y, U_y, b_y, delta_y);
+    for(int i=0; i<size; i++){
+        solution_x->data[i] -= delta_x.data[i];
+        solution_y->data[i] -= delta_y.data[i];
+    }
+    return;
 }
 
-void Kraftwerk2::Kraftwerk2_global_placement(){
-
+void Kraftwerk2::Kraftwerk2_global_placement(unordered_map<string,instance>& ins){
+    int delta =0;
+    if(part == PART::TOP){
+        delta = top_row_height;
+    }else{
+        delta = bottom_row_height;
+    }
+    for(int i=0; i<10; i++){
+        calc_gradient(delta, ins);
+        update_pos_diff();
+    }
 }
 
 //init_penalty
