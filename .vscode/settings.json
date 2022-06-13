@@ -16,7 +16,8 @@
     "cmath": "cpp",
     "dense": "cpp",
     "xutility": "cpp",
-    "string": "cpp"
+    "string": "cpp",
+    "list": "cpp"
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }

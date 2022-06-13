@@ -18,8 +18,8 @@ FM.o: src/FM_alg.cpp src/FM_alg.h
 	$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
 partition.o: src/partition.cpp src/partition.h
 	$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
-#Kraftwerk2.o: src/Kraftwerk2.cpp src/Kraftwerk2.h
-#	$(CC) $(CFLAGS) $(INCLUDE) $(OPTFLAGS) $< -o $@
+Kraftwerk2.o: src/Kraftwerk2.cpp src/Kraftwerk2.h
+	$(CC) $(CFLAGS) $(INCLUDE) $(OPTFLAGS) $< -o $@
 module.o: src/module.cpp src/module.h
 	$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
 
