@@ -5,13 +5,9 @@
 #include <utility>
 #include <random>
 #include "module.h"
+#include "extern.h"
 
 using namespace std;
-
-//extern variables
-extern vector<tech> tech_stack;
-extern unsigned int top_repeat_count, bottom_repeat_count;
-extern string top_die_tech, bottom_die_tech;
 
 typedef pair<int,int> distribution;
 #define T first 

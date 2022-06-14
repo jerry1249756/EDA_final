@@ -16,7 +16,15 @@
     "cmath": "cpp",
     "dense": "cpp",
     "xutility": "cpp",
-    "string": "cpp"
+    "string": "cpp",
+    "list": "cpp",
+    "array": "cpp",
+    "deque": "cpp",
+    "initializer_list": "cpp",
+    "queue": "cpp",
+    "type_traits": "cpp",
+    "valarray": "cpp",
+    "xtree": "cpp"
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }

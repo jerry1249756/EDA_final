@@ -1,10 +1,7 @@
 #ifndef FM_ALG_H
 #define FM_ALG_H
 
-//extern variables
-extern unsigned long long int die_area;
-extern unsigned int top_die_max_util, bottom_die_max_util;
-
+#include "extern.h"
 #include "partition.h"
 
 void initialize_gain(vector<cell_node>&);
