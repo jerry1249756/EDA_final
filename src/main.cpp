@@ -11,16 +11,19 @@ unsigned int top_die_max_util, bottom_die_max_util;
 unsigned int top_repeat_count, bottom_repeat_count; 
 string top_die_tech, bottom_die_tech;
 int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
+int top_row_height;
+int bottom_row_height;
+unsigned long long int TOP_area=0, BOTTOM_area=0;
 
 int main(int argc, char* argv[]){
     //read file
     fstream fin(argv[1]);
-    //fstream fout(argv[2]);
+    fstream fout(argv[2]);
     
     string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y;
-    int top_start_x, top_start_y, top_row_length, top_row_height;  
-    int bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height;  
+    int top_start_x, top_start_y, top_row_length;  
+    int bottom_start_x, bottom_start_y, bottom_row_length;  
     int terminal_size_x, terminal_size_y, terminal_spacing;
     int Num_instance, Num_net, Num_net_pin;
 
@@ -57,7 +60,7 @@ int main(int argc, char* argv[]){
     fin >> trash >> top_die_max_util >> trash >> bottom_die_max_util;
     fin >> trash >> top_start_x >> top_start_y >> top_row_length >> top_row_height >> top_repeat_count;
     fin >> trash >> bottom_start_x >> bottom_start_y >> bottom_row_length >> bottom_row_height >> bottom_repeat_count;
-    die_rows top_die_rows = {top_start_x, top_start_y, top_row_height, top_row_height, top_repeat_count};
+    die_rows top_die_rows = {top_start_x, top_start_y, top_row_length, top_row_height, top_repeat_count};
     die_rows bottom_die_rows = {bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height, bottom_repeat_count};
 
     fin >> trash >> top_die_tech >> trash >> bottom_die_tech;
@@ -120,64 +123,52 @@ int main(int argc, char* argv[]){
                 instances[name].tech = TECH::TECH_B;
         }
     }
+    
+
+    //fout
+    
 
     delete[] temp_partition;
     delete nodes;
     delete n;
 
     //test
-    Kraftwerk2 k(Num_instance,3,instances);
-    k.gen_connectivity_matrix(nets);
-    k.print_mat();
-
-    k.get_solution(instances);
-    int die_width = die_upper_x - die_lower_x;
-    vector<vector<float>> D;
-    vector<vector<float>> phi;
-    D.reserve(top_repeat_count);
-    phi.reserve(top_repeat_count);
-    for(int i = 0; i < D.capacity(); i++){
-        vector<float> temp;
-        vector<float> temp2;
-        temp.reserve(die_width/top_row_height);
-        temp2.reserve(die_width/top_row_height);
-        for(int j = 0; j < temp.capacity(); j++){
-            temp.push_back(0);
-            temp2.push_back(0);
-        }
-        D.push_back(temp);
-        phi.push_back(temp2);
-    }
-
+    Kraftwerk2 k1(Num_instance,instances);
+    //k1.print_solution();
+    k1.get_solution(instances);
+    k1.gen_connectivity_matrix(nets);
+    //k1.print_mat();
+    //k1.calc_gradient(instances);
+    //k1.update_pos_diff();
+    
     for(auto it = instances.begin(); it != instances.end(); ++it){
-        cout << it->second.libcell_type << ": ";
-        if(it->second.tech == TECH::TECH_A) cout << "TA ";
-        else cout << "TB ";
-        if(it->second.part == PART::TOP) cout << "top ";
-        else cout << "bottom ";
-        cout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
-        cout << endl;
-    }
-    cal_D(instances,D,PART::TOP,top_row_height,k.demand_x);
-    for(int i = 0; i < D.size(); i++){
-        for(int j = 0; j < D[i].size(); j++){
-            cout << "i= " << i;
-            cout << " j= " << j << "  ";
-            cout << D[i][j] << endl;
+        fout << it->first << " ";
+        if(it->second.part == PART::TOP){
+            fout << "top ";
         }
-    }
-    cal_phi(D,phi,top_row_height,10);
-    k.calc_gradient(phi,top_row_height,instances);
-    cout << "cal phi: " << endl;
-    for(int i = 0; i < phi.size(); i++){
-        for(int j = 0; j < phi[i].size(); j++){
-            cout << "i= " << i;
-            cout << " j= " << j << "  ";
-            cout << phi[i][j] << endl;
+        else{
+            fout << "bottom ";
         }
+        if(it->second.tech == TECH::TECH_A){
+            fout << tech_stack[0].libcells[it->second.libcell_type].width << " ";
+            fout << tech_stack[0].libcells[it->second.libcell_type].height << " ";
+        }
+        else{
+            fout << tech_stack[1].libcells[it->second.libcell_type].width << " ";
+            fout << tech_stack[1].libcells[it->second.libcell_type].height << " ";
+        }
+        fout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
+        fout << endl;
     }
-
+    
+    k1.print_solution(fout);
+    
+    k1.Kraftwerk2_global_placement(instances,fout);
+    //k1.print_solution();
+    //k.get_solution(instances);
+    k1.print_solution(fout);
     delete[] Net;
     fin.close();
+    fout.close();
     return 0;
 }

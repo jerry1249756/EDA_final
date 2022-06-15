@@ -17,12 +17,23 @@
     "dense": "cpp",
     "xutility": "cpp",
     "string": "cpp",
+<<<<<<< HEAD
     "array": "cpp",
     "deque": "cpp",
     "string_view": "cpp",
     "initializer_list": "cpp",
     "*.tcc": "cpp",
     "typeinfo": "cpp"
+=======
+    "list": "cpp",
+    "array": "cpp",
+    "deque": "cpp",
+    "initializer_list": "cpp",
+    "queue": "cpp",
+    "type_traits": "cpp",
+    "valarray": "cpp",
+    "xtree": "cpp"
+>>>>>>> 358c5233c6d605f49e0cbff212c3ed33fa72876f
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }

@@ -1,123 +1,71 @@
 #include "Kraftwerk2_utility.h"
 
-extern unsigned long long int die_area;
-extern int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
-extern string top_die_tech, bottom_die_tech;
-extern vector<tech> tech_stack;
-
-int row_count = die_upper_x - die_lower_x;
-int col_count = die_upper_y - die_lower_y;
-
 //D should be a m*n zero matrix
-void cal_D(unordered_map<string,instance> ins, vector<vector<float>>& D, PART region, int delta, Vector* demand){
+void cal_D(unordered_map<string,instance> ins, vector<vector<float>>& D){
     //region = 0 represent top, region = 1 represent bottom
+    int delta = min(top_row_height,bottom_row_height);
     for(auto it = ins.begin(); it != ins.end(); ++it){
-        int n = stoi(it->first.substr(1))-1;
-        if(region == PART::TOP){            
-            if(it->second.part == PART::TOP){
-                if(it->second.tech == TECH::TECH_A){            
-                    int pos_x = it->second.instance_pos.x;
-                    int pos_y = it->second.instance_pos.y;
-                    int width = tech_stack[0].libcells[it->second.libcell_type].width;
-                    int height = tech_stack[0].libcells[it->second.libcell_type].height;
-                    int initial_x;
-                    int initial_y;
-                    if(((pos_x - float(delta/2)) / delta) - int((pos_x - float(delta)/2) / delta) == 0)
-                        initial_x = (pos_x - float(delta/2))/delta;
-                    else
-                        initial_x = (pos_x - float(delta/2))/delta + 1;
-                    if(((pos_y - float(delta/2)) / delta) - int((pos_y - float(delta)/2) / delta) == 0)
-                        initial_y = (pos_y - float(delta/2))/delta;
-                    else
-                        initial_y = (pos_y - float(delta/2))/delta + 1;
-                    for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
-                        for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
-                            float temp = 1 - float(width*height)/die_area;
-                            D[i][j] = D[i][j] + temp;
-                            demand->data[n] += temp;
-                        }
+        int n = stoi(it->first.substr(1))-1;    
+        //cout << it->first << endl;
+        if(it->second.tech == TECH::TECH_A){         
+            int pos_x = 
+            int pos_y = it->second.instance_pos.y;
+            int width = tech_stack[0].libcells[it->second.libcell_type].width;
+            int height = tech_stack[0].libcells[it->second.libcell_type].height;
+            int initial_x;
+            int initial_y;
+            if(((pos_x - float(delta/2)) / delta) - int((pos_x - float(delta)/2) / delta) == 0)
+                initial_x = (pos_x - float(delta/2))/delta;
+            else
+                initial_x = (pos_x - float(delta/2))/delta + 1;
+            if(((pos_y - float(delta/2)) / delta) - int((pos_y - float(delta)/2) / delta) == 0)
+                initial_y = (pos_y - float(delta/2))/delta;
+            else
+                initial_y = (pos_y - float(delta/2))/delta + 1;
+            for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
+                for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
+                    if(i >= (die_upper_x-die_lower_x) / delta || j >= (die_upper_y-die_lower_y) / delta){
+                        continue;
                     }
-                }   
-                if(it->second.tech == TECH::TECH_B){            
-                    int pos_x = it->second.instance_pos.x;
-                    int pos_y = it->second.instance_pos.y;
-                    int width = tech_stack[1].libcells[it->second.libcell_type].width;
-                    int height = tech_stack[1].libcells[it->second.libcell_type].height;
-                    int initial_x;
-                    int initial_y;
-                    if(((pos_x - float(delta/2)) / delta) - int((pos_x - float(delta)/2) / delta) == 0)
-                        initial_x = (pos_x - float(delta/2))/delta;
-                    else
-                        initial_x = (pos_x - float(delta/2))/delta + 1;
-                    if(((pos_y - float(delta/2)) / delta) - int((pos_y - float(delta)/2) / delta) == 0)
-                        initial_y = (pos_y - float(delta/2))/delta;
-                    else
-                        initial_y = (pos_y - float(delta/2))/delta + 1;
-                    for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
-                        for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
-                            float temp = 1 - float(width*height)/die_area;
-                            D[i][j] = D[i][j] + temp;
-                            demand->data[n] += temp;
-                        }
+                    D[i][j] += 1;
+                }
+            }
+        }   
+        if(it->second.tech == TECH::TECH_B){            
+            int pos_x = it->second.instance_pos.x;
+            int pos_y = it->second.instance_pos.y;
+            int width = tech_stack[1].libcells[it->second.libcell_type].width;
+            int height = tech_stack[1].libcells[it->second.libcell_type].height;
+            int initial_x;
+            int initial_y;
+            if(((pos_x - float(delta/2)) / delta) - int((pos_x - float(delta)/2) / delta) == 0)
+                initial_x = (pos_x - float(delta/2))/delta;
+            else
+                initial_x = (pos_x - float(delta/2))/delta + 1;
+            if(((pos_y - float(delta/2)) / delta) - int((pos_y - float(delta)/2) / delta) == 0)
+                initial_y = (pos_y - float(delta/2))/delta;
+            else
+                initial_y = (pos_y - float(delta/2))/delta + 1;
+            for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
+                for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
+                    if(i >= (die_upper_x-die_lower_x) / delta || j >= (die_upper_y-die_lower_y) / delta){
+                        continue;
                     }
+                    D[i][j] += 1;
                 }
             }
         }
-        if(region == PART::BOTTOM){            
-            if(it->second.part == PART::BOTTOM){
-                if(it->second.tech == TECH::TECH_A){            
-                    int pos_x = it->second.instance_pos.x;
-                    int pos_y = it->second.instance_pos.y;
-                    int width = tech_stack[0].libcells[it->second.libcell_type].width;
-                    int height = tech_stack[0].libcells[it->second.libcell_type].height;
-                    int initial_x;
-                    int initial_y;
-                    if(((pos_x - float(delta/2)) / delta) - int((pos_x - float(delta)/2) / delta) == 0)
-                        initial_x = (pos_x - float(delta/2))/delta;
-                    else
-                        initial_x = (pos_x - float(delta/2))/delta + 1;
-                    if(((pos_y - float(delta/2)) / delta) - int((pos_y - float(delta)/2) / delta) == 0)
-                        initial_y = (pos_y - float(delta/2))/delta;
-                    else
-                        initial_y = (pos_y - float(delta/2))/delta + 1;
-                    for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
-                        for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
-                            float temp = 1 - float(width*height)/die_area;
-                            D[i][j] = D[i][j] + temp;
-                            demand->data[n] += temp;
-                        }
-                    }
-                }
-                else if(it->second.tech == TECH::TECH_B){            
-                    int pos_x = it->second.instance_pos.x;
-                    int pos_y = it->second.instance_pos.y;
-                    int width = tech_stack[1].libcells[it->second.libcell_type].width;
-                    int height = tech_stack[1].libcells[it->second.libcell_type].height;
-                    int initial_x;
-                    int initial_y;
-                    if(((pos_x - float(delta/2)) / delta) - int((pos_x - float(delta)/2) / delta) == 0)
-                        initial_x = (pos_x - float(delta/2))/delta;
-                    else
-                        initial_x = (pos_x - float(delta/2))/delta + 1;
-                    if(((pos_y - float(delta/2)) / delta) - int((pos_y - float(delta)/2) / delta) == 0)
-                        initial_y = (pos_y - float(delta/2))/delta;
-                    else
-                        initial_y = (pos_y - float(delta/2))/delta + 1;
-                    for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
-                        for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
-                            float temp = 1 - float(width*height)/die_area;
-                            D[i][j] = D[i][j] + temp;
-                            demand->data[n] += temp;
-                        }
-                    }
-                }
-            }
+    }
+    for(int i = 0; i < D.size(); i++){
+        for(int j = 0; j < D[i].size(); j++){
+             D[i][j] -= static_cast<float>(TOP_area+BOTTOM_area)/(2*die_area);
         }
     }
 }
 
 //phi should be m*n zero matrix
-void cal_phi(vector<vector<float>> D, vector<vector<float>>& phi, int delta, int times){
+void cal_phi(vector<vector<float>> D, vector<vector<float>>& phi, int times){
+    int delta = min(top_row_height,bottom_row_height);
     vector<vector<float>> temp;
     vector<vector<float>> temp3;
     temp.reserve(phi.size());
@@ -140,31 +88,31 @@ void cal_phi(vector<vector<float>> D, vector<vector<float>>& phi, int delta, int
                 for(int j = 0; j < phi[i].size(); j++){
                     if(i == 0){
                         if(j == 0){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i+1][j] + temp[i][j+1]) / 4; 
+                            temp3[i][j] = (delta*delta*D[i][j] + temp[i+1][j] + temp[i][j+1]) / 2; 
                         }
                         else if(j == phi[i].size()-1){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i+1][j] + temp[i][j-1]) / 4; 
+                            temp3[i][j] = (delta*delta*D[i][j] + temp[i+1][j] + temp[i][j-1]) / 2; 
                         }
                         else{
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i+1][j]) / 4;
+                            temp3[i][j] = (delta*delta*D[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i+1][j]*2) / 4;
                         }
                     }
                     else if(i == phi.size()-1){
                         if(j == 0){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j+1]) / 4; 
+                            temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j+1]) / 2; 
                         }
                         else if(j == phi[i].size()-1){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j-1]) / 4; 
+                            temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j-1]) / 2; 
                         }
                         else{
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i-1][j]) / 4;
+                            temp3[i][j] = (delta*delta*D[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i-1][j]*2) / 4;
                         }
                     }
                     else if(j == 0){
-                        temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j+1] + temp[i+1][j]) / 4;
+                        temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j+1]*2 + temp[i+1][j]) / 4;
                     }
                     else if(j == phi[i].size()-1){
-                        temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i+1][j] + temp[i][j-1]) / 4; 
+                        temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i+1][j] + temp[i][j-1]*2) / 4; 
                     }
                     else{
                         temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i+1][j] + temp[i][j-1] + temp[i][j+1]) / 4; 
