@@ -124,42 +124,42 @@ void Neighborhood::sort_row(vector<vector<int>>& topdie_row, vector<vector<int>>
     }
 }
 
-// void Neighborhood::sort_single_row(vector<vector<int>>& die_row, int row){
-//     sort(die_row[row].begin(), die_row[row].begin+die_row[row].size(), row_compare);
-// }
+void Neighborhood::sort_single_row(vector<vector<int>>& die_row, int row){
+    sort(die_row[row].begin(), die_row[row].end(), row_compare);
+}
 
-// int Neighborhood::single_row_penalty(vector<vector<int>>& die_row, int row){
-//     int init_penalty = 0;
-//     if(die_row[row].size()>0){
-//         if(die_row[row][0].PART == PART::TOP){
-//             for(int j=0; j<die_row[row].size()-1; j++){
-//                 for(int k=j+1; k<die_row[row].size(); k++){
-//                     if(find_pos_x(die_row[row][j])+tech_stack[toptech].libcells[find_libcelltype(die_row[i][j])].width>find_Pos_x(die_row[row][k])){
-//                         init_penalty += (find_pos_x(die_row[row][j])+tech_stack[toptech].libcells[find_libcelltype(die_row[row][j])].width-find_pos_x(die_row[row][k]))*top_row_height;
-//                     }
-//                     else break;
-//                 }
-//                 if(find_pos_x(die_row[row][j])+tech_stack[toptech].libcells[find_libcelltype(die_row[i][j])].width>die_upper_x){
-//                     init_penalty += 1000;
-//                 }
-//             }
-//         }
-//         else{
-//             for(int j=0; j<die_row[row].size()-1; j++){
-//                 for(int k=j+1; k<die_row[row].size(); k++){
-//                     if(find_pos_x(die_row[row][j])+tech_stack[bottomtech].libcells[find_libcelltype(die_row[i][j])].width>find_Pos_x(die_row[row][k])){
-//                         init_penalty += (find_pos_x(die_row[row][j])+tech_stack[bottomtech].libcells[find_libcelltype(die_row[row][j])].width-find_pos_x(die_row[row][k]))*bottom_row_height;
-//                     }
-//                     else break;
-//                 }
-//                 if(find_pos_x(die_row[row][j])+tech_stack[bottomtech].libcells[find_libcelltype(die_row[i][j])].width>die_upper_x){
-//                     init_penalty += 1000;
-//                 }
-//             }
-//         }
-//     }
-//     return init_penalty;
-// }
+int Neighborhood::single_row_penalty(vector<vector<int>>& die_row, int row){
+    int init_penalty = 0;
+    if(die_row[row].size()>0){
+        if(die_row[row][0].part == PART::TOP){
+            for(int j=0; j<die_row[row].size()-1; j++){
+                for(int k=j+1; k<die_row[row].size(); k++){
+                    if(find_pos_x(die_row[row][j], instances)+tech_stack[toptech].libcells[find_libcelltype(die_row[row][j], instances)].width>find_Pos_x(die_row[row][k], instances)){
+                        init_penalty += (find_pos_x(die_row[row][j], instances)+tech_stack[toptech].libcells[find_libcelltype(die_row[row][j], instances)].width-find_pos_x(die_row[row][k], instances))*top_row_height;
+                    }
+                    else break;
+                }
+                // if(find_pos_x(die_row[row][j], instances)+tech_stack[toptech].libcells[find_libcelltype(die_row[i][j], instances)].width>die_upper_x){
+                //     init_penalty += 1000;
+                // }
+            }
+        }
+        else{
+            for(int j=0; j<die_row[row].size()-1; j++){
+                for(int k=j+1; k<die_row[row].size(); k++){
+                    if(find_pos_x(die_row[row][j], instances)+tech_stack[bottomtech].libcells[find_libcelltype(die_row[row][j], instances)].width>find_Pos_x(die_row[row][k], instances)){
+                        init_penalty += (find_pos_x(die_row[row][j], instances)+tech_stack[bottomtech].libcells[find_libcelltype(die_row[row][j], instances)].width-find_pos_x(die_row[row][k], instances))*bottom_row_height;
+                    }
+                    else break;
+                }
+                // if(find_pos_x(die_row[row][j], instances)+tech_stack[bottomtech].libcells[find_libcelltype(die_row[i][j], instances)].width>die_upper_x){
+                //     init_penalty += 1000;
+                // }
+            }
+        }
+    }
+    return init_penalty;
+}
 
 long long int Neighborhood::init_penalty(unordered_map<string, instance>& ins, vector<vector<int>>& topdie_row, vector<vector<int>>& bottomdie_row){
     long long int init_penalty = 0;
@@ -196,190 +196,188 @@ long long int Neighborhood::init_penalty(unordered_map<string, instance>& ins, v
     return init_penalty;
 }
 
-// void Neighborhood::swap_instance(int from, int to){
-//     int temp_x = find_pos_x(from);
-//     int temp_y = find_Pos_x(from);
-//     find_pos_x(from) = find_pos_x(to);
-//     find_pos_y(from) = find_pos_y(to);
-//     find_pos_x(to) = temp_x;
-//     find_pos_y(to) = temp_y;
-// }
+void Neighborhood::swap_instance(int from, int to){
+    int temp_x = find_pos_x(from);
+    int temp_y = find_Pos_x(from);
+    instances["C"+to_string(from)].instance_pos.x = find_pos_x(to);
+    instances["C"+to_string(from)].instance_pos.y = find_pos_y(to);
+    instances["C"+to_string(to)].instance_pos.x = temp_x;
+    instances["C"+to_string(to)].instance_pos.y = temp_y;
+}
 
-// void Neighborhood::two_die_swap_instance(int from, int to){
-//     int temp_x = find_pos_x(from);
-//     int temp_y = find_Pos_x(from);
-//     TECH temp_tech = find_tech(from);
-//     PART temp_part = find_part(from);
-//     find_pos_x(from) = find_pos_x(to);
-//     find_pos_y(from) = find_pos_y(to);
-//     find_pos_x(to) = temp_x;
-//     find_pos_y(to) = temp_y;
-//     if(find_part(to) == PART::TOP) find_part(from) = PART::TOP;
-//     else find_part(from) = PART::BOTTOM;
-//     find_part(to) = temp_part;
-//     if(find_tech(to) == TECH::TECH_A) find_tech(from) = TECH::TECK_A;
-//     else find_tech(from) = TECH::TECK_B;
-//     find_tech(to) = temp_tech;
-// }
+void Neighborhood::two_die_swap_instance(int from, int to){
+    int temp_x = find_pos_x(from);
+    int temp_y = find_Pos_x(from);
+    TECH temp_tech = find_tech(from);
+    PART temp_part = find_part(from);
+    instances["C"+to_string(from)].instance_pos.x = find_pos_x(to);
+    instances["C"+to_string(from)].instance_pos.y = find_pos_y(to);
+    instances["C"+to_string(to)].instance_pos.x = temp_x;
+    instances["C"+to_string(to)].instance_pos.y = temp_y;
+    instances["C"+to_string(from)].part = find_part(to);
+    instances["C"+to_string(to)].part = temp_part;
+    instances["C"+to_string(from)].tech = find_tech(to);
+    instances["C"+to_string(to)].tech = temp_tech;
+}
 
-// int Neighborhood::swap_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_row, int to_col){
-//     int cost = 0;
-//     int before, after;
-//     vector<string> netname;
-//     for(int i=0; i<find_connected(die_row[from_row][from_col]).size(); i++){
-//         if(find(netname.begin(), netname.end(), find_connected(die_row[from_row][from_col])[i]->Net_name) == netname.end()){
-//             netname.push_back(find_connected(die_row[from_row][from_col])[i]->Net_name);
-//         }
-//     }
-//     for(int i=0; i<find_connected(die_row[to_row][to_col]).size(); i++){
-//         if(find(netname.begin(), netname.end(), find_connected(die_row[to_row][to_col])[i]->Net_name) == netname.end()){
-//             netname.push_back(find_connected(die_row[to_row][to_col])[i]->Net_name);
-//         }
-//     }
-//     swap_instance(die_row[from_row][from_col], die_row[to_row][to_col]);
-//     for(int i=0; i<netname.size(); i++){
-//         before = nets[netname[i]]->cost;
-//         single_net_cost(instances, nets, netname[i]);
-//         after = nets[netname[i]]->cost;
-//         cost += after - before;
-//     }
-//     swap_instance(die_row[from_row][from_col], die_row[to_row][to_col]);
-//     return cost;
-// }
+int Neighborhood::swap_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_row, int to_col){
+    int cost = 0;
+    int before, after;
+    vector<string> netname;
+    for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
+        if(find(netname.begin(), netname.end(), find_connected(die_row[from_row][from_col], ins)[i]->Net_name) == netname.end()){
+            netname.push_back(find_connected(die_row[from_row][from_col], ins)[i]->Net_name);
+        }
+    }
+    for(int i=0; i<find_connected(die_row[to_row][to_col], ins).size(); i++){
+        if(find(netname.begin(), netname.end(), find_connected(die_row[to_row][to_col], ins)[i]->Net_name) == netname.end()){
+            netname.push_back(find_connected(die_row[to_row][to_col], ins)[i]->Net_name);
+        }
+    }
+    swap_instance(die_row[from_row][from_col], die_row[to_row][to_col]);
+    for(int i=0; i<netname.size(); i++){
+        before = nets[netname[i]]->cost;
+        single_net_cost(ins, nets, netname[i]);
+        after = nets[netname[i]]->cost;
+        cost += after - before;
+    }
+    swap_instance(die_row[from_row][from_col], die_row[to_row][to_col]);
+    return cost;
+}
 
-// int Neighborhood::two_die_swap_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
-//     int cost = 0;
-//     int before, after;
-//     vector<string> netname;
-//     for(int i=0; i<find_connected(from_die_row[from_row][from_col]).size(); i++){
-//         if(find(netname.begin(), netname.end(), find_connected(from_die_row[from_row][from_col])[i]->Net_name) == netname.end()){
-//             netname.push_back(find_connected(from_die_row[from_row][from_col])[i]->Net_name);
-//         }
-//     }
-//     for(int i=0; i<find_connected(to_die_row[to_row][to_col]).size(); i++){
-//         if(find(netname.begin(), netname.end(), find_connected(to_die_row[to_row][to_col])[i]->Net_name) == netname.end()){
-//             netname.push_back(find_connected(to_die_row[to_row][to_col])[i]->Net_name);
-//         }
-//     }
-//     two_die_swap_instance(from_die_row[from_row][from_col], to_die_row[to_row][to_col]);
-//     for(int i=0; i<netname.size(); i++){
-//         before = nets[netname[i]]->cost;
-//         single_net_cost(instances, nets, netname[i]);
-//         after = nets[netname[i]]->cost;
-//         cost += after - before;
-//     }
-//     two_die_swap_instance(to_die_row[to_row][to_col], from_die_row[from_row][from_col]);
-//     return cost;
-// }
+int Neighborhood::two_die_swap_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
+    int cost = 0;
+    int before, after;
+    vector<string> netname;
+    for(int i=0; i<find_connected(from_die_row[from_row][from_col], ins).size(); i++){
+        if(find(netname.begin(), netname.end(), find_connected(from_die_row[from_row][from_col], ins)[i]->Net_name) == netname.end()){
+            netname.push_back(find_connected(from_die_row[from_row][from_col], ins)[i]->Net_name);
+        }
+    }
+    for(int i=0; i<find_connected(to_die_row[to_row][to_col], ins).size(); i++){
+        if(find(netname.begin(), netname.end(), find_connected(to_die_row[to_row][to_col], ins)[i]->Net_name) == netname.end()){
+            netname.push_back(find_connected(to_die_row[to_row][to_col], ins)[i]->Net_name);
+        }
+    }
+    two_die_swap_instance(from_die_row[from_row][from_col], to_die_row[to_row][to_col]);
+    for(int i=0; i<netname.size(); i++){
+        before = nets[netname[i]]->cost;
+        single_net_cost(ins, nets, netname[i]);
+        after = nets[netname[i]]->cost;
+        cost += after - before;
+    }
+    two_die_swap_instance(to_die_row[to_row][to_col], from_die_row[from_row][from_col]);
+    return cost;
+}
 
-// int Neighborhood::move_in_row_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
-//     int cost = 0;
-//     int before, after;
-//     int temp_x;
-//     temp_x = find_pos_x(die_row[from_row][from_col]);
-//     find_pos_x(die_row[from_row][from_col]) = to_x;
-//     for(int i=0; i<find_connected(die_row[from_row][from_col]).size(); i++){
-//         before = nets[find_connected(die_row[from_row][from_col])[i]]->cost;
-//         single_net_cost(instances, nets, find_connected(die_row[from_row][from_col])[i]);
-//         after = nets[find_connected(die_row[from_row][from_col])[i]]->cost;
-//         cost += after - before;
-//     }
-//     find_pos_x(die_row[from_row][from_col]) = temp_x;
-//     return cost;
-// }
+int Neighborhood::move_in_row_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
+    int cost = 0;
+    int before, after;
+    int temp_x;
+    temp_x = find_pos_x(die_row[from_row][from_col], ins);
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = to_x;
+    for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
+        before = nets[find_connected(die_row[from_row][from_col], ins)[i]]->cost;
+        single_net_cost(ins, nets, find_connected(die_row[from_row][from_col], ins)[i]);
+        after = nets[find_connected(die_row[from_row][from_col], ins)[i]]->cost;
+        cost += after - before;
+    }
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = temp_x;
+    return cost;
+}
 
-// int Neighborhood::move_between_row_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
-//     int cost = 0;
-//     int before, after;
-//     int temp_y;
-//     temp_y = find_pos_y(die_row[from_row][from_col]);
-//     if(find_part(die_row[from_row][from_col]) == PART::TOP) find_pos_y(die_row[from_row][from_col]) = to_y/top_row_height*top_row_height;
-//     else find_pos_y(die_row[from_row][from_col]) = to_y/bottom_row_height*bottom_row_height;
-//     for(int i=0; i<find_connected(die_row[from_row][from_col]).size(); i++){
-//         before = nets[find_connected(die_row[from_row][from_col])[i]]->cost;
-//         single_net_cost(instances, nets, find_connected(die_row[from_row][from_col])[i]);
-//         after = nets[find_connected(die_row[from_row][from_col])[i]]->cost;
-//         cost += after - before;
-//     }
-//     find_pos_y(die_row[from_row][from_col]) = temp_y;
-//     return cost;
-// }
+int Neighborhood::move_between_row_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
+    int cost = 0;
+    int before, after;
+    int temp_y;
+    temp_y = find_pos_y(die_row[from_row][from_col], ins);
+    if(find_part(die_row[from_row][from_col], ins) == PART::TOP) instances["C"+to_string(die_row[from_row][from_col])].instance_pos.y = to_y/top_row_height*top_row_height;
+    else instances["C"+to_string(die_row[from_row][from_col])].instance_pos.y = to_y/bottom_row_height*bottom_row_height;
+    for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
+        before = nets[find_connected(die_row[from_row][from_col], ins)[i]]->cost;
+        single_net_cost(ins, nets, find_connected(die_row[from_row][from_col], ins)[i]);
+        after = nets[find_connected(die_row[from_row][from_col], ins)[i]]->cost;
+        cost += after - before;
+    }
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.y = temp_y;
+    return cost;
+}
 
-// int Neighborhood::two_die_move_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col){
-//     int cost = 0;
-//     int before, after;
-//     int temp_y;
-//     temp_y = find_pos_y(from_die_row[from_row][from_col]);
-//     if(find_part(from_die_row[from_row][from_col]) == PART::TOP){
-//         find_part(from_die_row[from_row][from_col]) = PART::BOTTOM;
-//         find_pos_y(from_die_row[from_row][from_col]) = find_pos_y(from_die_row[from_row][from_col])/bottom_row_height*bottom_row_height;
-//     }
-//     else{
-//         find_part(from_die_row[from_row][from_col]) = PART::TOP;
-//         find_pos_y(from_die_row[from_row][from_col]) = find_pos_y(from_die_row[from_row][from_col])/top_row_height*top_row_height;
-//     }
-//     for(int i=0; i<find_connected(from_die_row[from_row][from_col]).size(); i++){
-//         before = nets[find_connected(from_die_row[from_row][from_col])[i]]->cost;
-//         single_net_cost(instances, nets, find_connected(from_die_row[from_row][from_col])[i]);
-//         after = nets[find_connected(from_die_row[from_row][from_col])[i]]->cost;
-//         cost += after - before;
-//     }
-//     if(find_part(from_die_row[from_row][from_col]) == PART::TOP)  find_part(from_die_row[from_row][from_col]) = PART::BOTTOM;
-//     else find_part(from_die_row[from_row][from_col]) = PART::TOP;
-//     find_pos_y(from_die_row[from_row][from_col]) = temp_y;
-//     return cost;
-// } 
+int Neighborhood::two_die_move_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col){
+    int cost = 0;
+    int before, after;
+    int temp_y;
+    temp_y = find_pos_y(from_die_row[from_row][from_col], ins);
+    if(find_part(from_die_row[from_row][from_col], ins) == PART::TOP){
+        ins["C"+to_string(from_die_row[from_row][from_col])].part = PART::BOTTOM;
+        ins["C"+to_string(from_die_row[from_row][from_col])].instance_pos.y = find_pos_y(from_die_row[from_row][from_col])/bottom_row_height*bottom_row_height;
+    }
+    else{
+        ins["C"+to_string(from_die_row[from_row][from_col])].part = PART::TOP;
+        ins["C"+to_string(from_die_row[from_row][from_col])].instance_pos.y = find_pos_y(from_die_row[from_row][from_col])/top_row_height*top_row_height;
+    }
+    for(int i=0; i<find_connected(from_die_row[from_row][from_col], ins).size(); i++){
+        before = nets[find_connected(from_die_row[from_row][from_col], ins)[i]]->cost;
+        single_net_cost(ins, nets, find_connected(from_die_row[from_row][from_col], ins)[i]);
+        after = nets[find_connected(from_die_row[from_row][from_col], ins)[i]]->cost;
+        cost += after - before;
+    }
+    if(find_part(from_die_row[from_row][from_col], ins) == PART::TOP)  ins["C"+to_string(from_die_row[from_row][from_col])].part = PART::BOTTOM;
+    else ins["C"+to_string(from_die_row[from_row][from_col])].part = PART::TOP;
+    ins["C"+to_string(from_die_row[from_row][from_col])].instance_pos.y = temp_y;
+    return cost;
+} 
 
-// void Neighborhood::update_swap(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
-//     two_die_swap_instance(from_die_row[from_row][from_col], to_die_row[to_row][to_col]);
-//     from_die_row[from_row].push_back(to_die_row[to_row][to_col]);
-//     to_die_row[to_row].push_back(from_die_row[from_row][from_col]);
-//     from_die_row[from_row].erase(from_die_row[from_row].begin()+from_col);
-//     to_die_row[to_row].erase(to_die_row[to_row].begin()+to_col);
-//     sort_single_row(from_die_row, from_row);
-//     sort_single_row(to_die_row, to_row);
-// }
+void Neighborhood::update_swap(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
+    two_die_swap_instance(from_die_row[from_row][from_col], to_die_row[to_row][to_col]);
+    from_die_row[from_row].push_back(to_die_row[to_row][to_col]);
+    to_die_row[to_row].push_back(from_die_row[from_row][from_col]);
+    from_die_row[from_row].erase(from_die_row[from_row].begin()+from_col);
+    to_die_row[to_row].erase(to_die_row[to_row].begin()+to_col);
+    sort_single_row(from_die_row, from_row);
+    sort_single_row(to_die_row, to_row);
+}
 
-// void Neighborhood::update_move_in_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
-//     find_pos_x(die_row[from_row][from_col]) = to_x;
-//     sort_single_row(die_row, from_row);
-// }
+void Neighborhood::update_move_in_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = to_x;
+    sort_single_row(die_row, from_row);
+}
 
-// void Neighborhood::update_move_between_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
-//     if(find_part(die_row[from_row][from_col] == PART::TOP)){
-//         find_pos_y(die_row[from_row][from_col]) = to_y/top_row_height*top_row_height;
-//         die_row[find_pos_y(die_row[from_row][from_col])/top_row_height].push_back(die_row[from_row][from_col]);
-//         sort(die_row, find_pos_y(die_row[from_row][from_col])/top_row_height);
-//     }
-//     else{
-//         find_pos_y(die_row[from_row][from_col]) = to_y/bottom_row_height*bottom_row_height;
-//         die_row[find_pos_y(die_row[from_row][from_col])/bottom_row_height].push_back(die_row[from_row][from_col]);
-//         sort(die_row, find_pos_y(die_row[from_row][from_col])/bottom_row_height);
-//     }
-//     die_row[from_row].erase(die_row[from_row].begin()+from_col);
-//     sort(die_row, from_row);
-// }
+void Neighborhood::update_move_between_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
+    if(find_part(die_row[from_row][from_col], instances) == PART::TOP){
+        instances["C"+to_string(die_row[from_row][from_col])].instance_pos.y = to_y/top_row_height*top_row_height;
+        die_row[find_pos_y(die_row[from_row][from_col], instances)/top_row_height].push_back(die_row[from_row][from_col]);
+        sort(die_row, find_pos_y(die_row[from_row][from_col], instances)/top_row_height);
+    }
+    else{
+        instances["C"+to_string(die_row[from_row][from_col])].instance_pos.y = to_y/bottom_row_height*bottom_row_height;
+        die_row[find_pos_y(die_row[from_row][from_col], instances)/bottom_row_height].push_back(die_row[from_row][from_col]);
+        sort(die_row, find_pos_y(die_row[from_row][from_col], instances)/bottom_row_height);
+    }
+    die_row[from_row].erase(die_row[from_row].begin()+from_col);
+    sort(die_row, from_row);
+}
 
-// void Neighborhood::update_two_die_move(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col){
-//     if(find_part(from_die_row[from_row][from_col]) == PART::TOP){
-//         find_pos_y(from_die_row[from_row][from_col]) = to_y/bottom_row_height*bottom_row_height;
-//         to_die_row[find_pos_y(from_die_row[from_row][from_col])/bottom_row_height].push_back(from_die_row[from_row][from_col]);
-//         sort(to_die_row, find_pos_y(from_die_row[from_row][from_col])/bottom_row_height);
-//     }
-//     else{
-//         find_pos_y(from_die_row[from_row][from_col]) = to_y/top_row_height*top_row_height;
-//         to_die_row[find_pos_y(from_die_row[from_row][from_col])/top_row_height].push_back(from_die_row[from_row][from_col]);
-//         sort(to_die_row, find_pos_y(from_die_row[from_row][from_col])/to_row_height);
-//     }
-//     if(find_part(from_die_row[from_row][from_col]) == PART::TOP) find_part(from_die_row[from_row][from_col]) = PART::BOTTOM;
-//     else find_part(from_die_row[from_row][from_col]) = PART::TOP;
-//     for(int i=0; i<to_die.size(); i++){
-//         if(to_die[i].size>0){
-//             if(find_tech(to_die_row[i][0]) == TECH::TECH_A) find_tech(from_die_row[from_row][from_col]) = TECH::TECH_A;
-//             else find_tech(from_die_row[from_row][from_col]) = TECH::TECH_B;
-//             break;
-//         }
-//     }
-//     from_die_row[from_row].erase(from_die_row[from_row].begin()+from_col);
-//     sort(from_die_row, from_row);
-// }
+void Neighborhood::update_two_die_move(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col){
+    if(find_part(from_die_row[from_row][from_col], instances) == PART::TOP){
+        instances["C"+to_string(from_die_row[from_row][from_col])].instance_pos.y = to_y/bottom_row_height*bottom_row_height;
+        to_die_row[find_pos_y(from_die_row[from_row][from_col], instances)/bottom_row_height].push_back(from_die_row[from_row][from_col]);
+        sort(to_die_row, find_pos_y(from_die_row[from_row][from_col], instances)/bottom_row_height);
+    }
+    else{
+        instances["C"+to_string(from_die_row[from_row][from_col])].instance_pos.y = to_y/top_row_height*top_row_height;
+        to_die_row[find_pos_y(from_die_row[from_row][from_col], instances)/top_row_height].push_back(from_die_row[from_row][from_col]);
+        sort(to_die_row, find_pos_y(from_die_row[from_row][from_col], instances)/to_row_height);
+    }
+    if(find_part(from_die_row[from_row][from_col], instances) == PART::TOP) instances["C"+to_string(from_die_row[from_row][from_col])].part = PART::BOTTOM;
+    else instances["C"+to_string(from_die_row[from_row][from_col])].part = PART::TOP;
+    for(int i=0; i<to_die.size(); i++){
+        if(to_die[i].size>0){
+            if(find_tech(to_die_row[i][0], instances) == TECH::TECH_A) instances["C"+to_string(from_die_row[from_row][from_col])].tech = TECH::TECH_A;
+            else instances["C"+to_string(from_die_row[from_row][from_col])].tech = TECH::TECH_B;
+            break;
+        }
+    }
+    from_die_row[from_row].erase(from_die_row[from_row].begin()+from_col);
+    sort(from_die_row, from_row);
+}
