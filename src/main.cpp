@@ -13,11 +13,12 @@ string top_die_tech, bottom_die_tech;
 int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
 int top_row_height;
 int bottom_row_height;
+unsigned long long int TOP_area=0, BOTTOM_area=0;
 
 int main(int argc, char* argv[]){
     //read file
     fstream fin(argv[1]);
-    //fstream fout(argv[2]);
+    fstream fout(argv[2]);
     
     string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y;
@@ -122,25 +123,10 @@ int main(int argc, char* argv[]){
                 instances[name].tech = TECH::TECH_B;
         }
     }
+    
 
-    for(auto it = instances.begin(); it != instances.end(); ++it){
-        cout << it->first << " ";
-        if(it->second.part == PART::TOP){
-            cout << "top ";
-        }
-        else{
-            cout << "bottom ";
-        }
-        if(it->second.tech == TECH::TECH_A){
-            cout << tech_stack[0].libcells[it->second.libcell_type].width << " ";
-            cout << tech_stack[0].libcells[it->second.libcell_type].height << " ";
-        }
-        else{
-            cout << tech_stack[1].libcells[it->second.libcell_type].width << " ";
-            cout << tech_stack[1].libcells[it->second.libcell_type].height << " ";
-        }
-        cout << endl;
-    }
+    //fout
+    
 
     delete[] temp_partition;
     delete nodes;
@@ -148,17 +134,41 @@ int main(int argc, char* argv[]){
 
     //test
     Kraftwerk2 k1(Num_instance,instances);
-    k1.print_solution();
+    //k1.print_solution();
     k1.get_solution(instances);
     k1.gen_connectivity_matrix(nets);
     //k1.print_mat();
     //k1.calc_gradient(instances);
     //k1.update_pos_diff();
-    k1.Kraftwerk2_global_placement(instances);
-    k1.print_solution();
-    //k.get_solution(instances);
     
+    for(auto it = instances.begin(); it != instances.end(); ++it){
+        fout << it->first << " ";
+        if(it->second.part == PART::TOP){
+            fout << "top ";
+        }
+        else{
+            fout << "bottom ";
+        }
+        if(it->second.tech == TECH::TECH_A){
+            fout << tech_stack[0].libcells[it->second.libcell_type].width << " ";
+            fout << tech_stack[0].libcells[it->second.libcell_type].height << " ";
+        }
+        else{
+            fout << tech_stack[1].libcells[it->second.libcell_type].width << " ";
+            fout << tech_stack[1].libcells[it->second.libcell_type].height << " ";
+        }
+        fout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
+        fout << endl;
+    }
+    
+    k1.print_solution(fout);
+    
+    k1.Kraftwerk2_global_placement(instances,fout);
+    //k1.print_solution();
+    //k.get_solution(instances);
+    k1.print_solution(fout);
     delete[] Net;
     fin.close();
+    fout.close();
     return 0;
 }

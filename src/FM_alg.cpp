@@ -1,7 +1,7 @@
 #include "FM_alg.h"
 
 //I don't know where to define this!!!
-long long int TOP_area=0, BOTTOM_area=0;
+
 
 void initialize_gain(vector<cell_node>& v){
     for(vector<cell_node>::iterator it=v.begin(); it!=v.end(); ++it){

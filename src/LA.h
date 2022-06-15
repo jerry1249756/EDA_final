@@ -2,6 +2,7 @@
 #define LA_H
 
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <vector>
 
@@ -11,9 +12,9 @@ class Vector{
     public:
         Vector(int);
         Vector(const Vector&);
-        void print_data();
+        void print_data(fstream&);
         int size;
-        vector<double> data;
+        vector<float> data;
 };
 
 class Matrix{
@@ -24,7 +25,7 @@ class Matrix{
         void exchange_rows(int, int);
         void print_data();
         int size;
-        vector<vector<double>> data;
+        vector<vector<float>> data;
 };
 
 void Matrix_Addition(Matrix& A, Matrix& B, Matrix& C);

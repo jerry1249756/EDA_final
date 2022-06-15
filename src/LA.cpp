@@ -2,9 +2,6 @@
 
 Vector::Vector(int n){
     data.resize(n);
-    for(int i=0;i<n; i++){
-        data[i] = 0;
-    }
     size = n;
 }
 
@@ -17,11 +14,11 @@ Vector::Vector(const Vector& v1){
     size = n;
 }
 
-void Vector::print_data(){
+void Vector::print_data(fstream& fout){
     for(int i=0; i<size; i++){
-        cout << data[i] << " ";
+        fout << data[i] << " ";
     }
-    cout << "\n";
+    fout << "\n";
 }
 
 
@@ -29,11 +26,6 @@ Matrix::Matrix(int n){
     data.resize(n);
     for(int i=0; i<n; i++){
         data[i].resize(n);
-    }
-    for(int i=0;i<data.capacity(); i++){
-        for(int j=0; j<data[i].capacity(); j++){
-            data[i][j] = 0;
-        }
     }
     size = n;
 }
@@ -54,7 +46,7 @@ Matrix::Matrix(const Matrix& m1){
 
 void Matrix::exchange_rows(int a, int b){
     for(int i=0; i<size; i++){
-        double temp = data[a][i];
+        float temp = data[a][i];
         data[a][i] = data[b][i];
         data[b][i] = temp;
     }
@@ -78,7 +70,7 @@ void Matrix::PLU_decomposition(Matrix& L, Matrix& U, Matrix& P){ //PA=LU
         P.data[i][i] = 1;
     }
     for(int k=0; k<n; k++){
-        double p=0;
+        float p=0;
         int k_prime = k;
         for(int i=k; i<n; i++){
             if(abs(data[i][k])>p){
@@ -149,7 +141,7 @@ void solve_linear_system(Matrix& P, Matrix& L, Matrix& U, Vector& b, Vector& x){
         } 
     }
     for(int i=n-1; i>=0; i--){
-        double sum = 0;
+        float sum = 0;
         for(int j=i+1; j<n; j++){
             sum += U.data[i][j]*x.data[j];
         }
