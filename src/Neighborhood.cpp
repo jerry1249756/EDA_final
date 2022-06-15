@@ -98,16 +98,16 @@ void Neighborhood::place_instance_to_each_row(unordered_map<string, instance>& i
     bottomdie_row.resize(bottom_repeat_count);
     for(int i=0; i<instances.size(); i++){
         if(instances["C"+to_string(i+1)].part == PART::TOP){
-            if(instances["C"+to_string(i+1)].instance_pos.y>=die_upper_y-0.5*top_row_height) instances["C"+to_string(i+1)].instance_pos.y = die_upper_y-top_row_height;
+            if(instances["C"+to_string(i+1)].instance_pos.y>=top_die_upper_y-0.5*top_row_height) instances["C"+to_string(i+1)].instance_pos.y = top_die_upper_y-top_row_height;
             else if(instances["C"+to_string(i+1)].instance_pos.y<die_lower_y) instances["C"+to_string(i+1)].instance_pos.y = die_lower_y;
-            else instances["C"+to_string(i+1)].instance_pos.y = (int)((double)find_pos_y(i+1, instances)+0.5*top_row_height)/top_row_height*top_row_height;
-            topdie_row[(int)((double)find_pos_y(i+1, instances)+0.5*top_row_height)/top_row_height].push_back(i+1);
+            else instances["C"+to_string(i+1)].instance_pos.y = static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*top_row_height)/top_row_height)*top_row_height;
+            topdie_row[static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*top_row_height)/top_row_height)].push_back(i+1);
         }
         else{
-            if(instances["C"+to_string(i+1)].instance_pos.y>=die_upper_y-0.5*bottom_row_height) instances["C"+to_string(i+1)].instance_pos.y = die_upper_y-bottom_row_height;
+            if(instances["C"+to_string(i+1)].instance_pos.y>=bottom_die_upper_y-0.5*bottom_row_height) instances["C"+to_string(i+1)].instance_pos.y = bottom_die_upper_y-bottom_row_height;
             else if(instances["C"+to_string(i+1)].instance_pos.y<die_lower_y) instances["C"+to_string(i+1)].instance_pos.y = die_lower_y;
-            else instances["C"+to_string(i+1)].instance_pos.y = (int)((double)find_pos_y(i+1, instances)+0.5*bottom_row_height)/bottom_row_height*bottom_row_height;
-            bottomdie_row[(int)((double)find_pos_y(i+1, instances)+0.5*bottom_row_height)/bottom_row_height].push_back(i+1);
+            else instances["C"+to_string(i+1)].instance_pos.y = static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*bottom_row_height)/bottom_row_height)*bottom_row_height;
+            bottomdie_row[static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*bottom_row_height)/bottom_row_height)].push_back(i+1);
         }
     }
 }
@@ -164,10 +164,8 @@ void Neighborhood::sort_row(vector<vector<int>>& topdie_row, vector<vector<int>>
 long long int Neighborhood::init_penalty(unordered_map<string, instance>& ins, vector<vector<int>>& topdie_row, vector<vector<int>>& bottomdie_row){
     long long int init_penalty = 0;
     for(int i=0; i<top_repeat_count; i++){
-        cout << endl;
         for(int j=0; j<topdie_row[i].size()-1; j++){
             for(int k=j+1; k<topdie_row[i].size(); k++){
-                cout << "top: " << i <<" "<< j <<" "<<k;
                 if(find_pos_x(topdie_row[i][j], ins)+tech_stack[toptech].libcells[find_libcelltype(topdie_row[i][j], ins)].width>find_pos_x(topdie_row[i][k], ins)){
                     init_penalty += (find_pos_x(topdie_row[i][j], ins)+tech_stack[toptech].libcells[find_libcelltype(topdie_row[i][j], ins)].width-find_pos_x(topdie_row[i][k], ins))*top_row_height;
                 }
@@ -179,10 +177,8 @@ long long int Neighborhood::init_penalty(unordered_map<string, instance>& ins, v
         }
     }
     for(int i=0; i<bottom_repeat_count; i++){
-        cout << endl;
         for(int j=0; j<bottomdie_row[i].size()-1; j++){
             for(int k=j+1; k<bottomdie_row[i].size(); k++){
-                cout << "top: " << i <<" "<< j <<" "<<k;
                 if(find_pos_x(bottomdie_row[i][j], ins)+tech_stack[bottomtech].libcells[find_libcelltype(bottomdie_row[i][j], ins)].width>find_pos_x(bottomdie_row[i][k], ins)){
                     init_penalty += (find_pos_x(bottomdie_row[i][j], ins)+tech_stack[bottomtech].libcells[find_libcelltype(bottomdie_row[i][j], ins)].width-find_pos_x(bottomdie_row[i][k], ins))*bottom_row_height;
                 }
