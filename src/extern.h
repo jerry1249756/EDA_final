@@ -3,9 +3,11 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 #include "module.h"
 using namespace std;
 
+extern unordered_map<string, instance> instances;
 extern vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
 extern unsigned long long int die_area;
 extern unsigned int top_die_max_util, bottom_die_max_util;

@@ -1,10 +1,11 @@
 #include <fstream>
 #include "FM_alg.h"
 #include "module.h"
-#include "Kraftwerk2_utility.h"
+#include "Neighborhood.h"
 #include "Kraftwerk2.h"
 using namespace std;
 
+unordered_map<string, instance> instances;
 vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
 unsigned long long int die_area;
 unsigned int top_die_max_util, bottom_die_max_util;
@@ -67,7 +68,7 @@ int main(int argc, char* argv[]){
     fin >> trash >> terminal_size_x >> terminal_size_y;
     fin >> trash >> terminal_spacing;
     fin >> trash >> Num_instance;
-    unordered_map<string, instance> instances;
+    
     unordered_map<string, net*> nets;
     instances.reserve(Num_instance);
     vector<cell_node>* nodes = new vector<cell_node>; 
@@ -133,9 +134,21 @@ int main(int argc, char* argv[]){
     delete n;
 
     //test
+
+    // cost test
+    Neighborhood nei;
+
     Kraftwerk2 k1(Num_instance,instances);
     //k1.print_solution();
     k1.get_solution(instances);
+
+    cout << "before cost: " << nei.calc_cost(instances ,nets) << endl;
+    vector<vector<int>> toptop;
+    vector<vector<int>> botbot;
+    nei.place_instance_to_each_row(instances, toptop, botbot);
+    nei.sort_row(toptop, botbot);
+    cout << "before penalty: " << nei.init_penalty(instances, toptop, botbot) << endl;
+
     k1.gen_connectivity_matrix(nets);
     //k1.print_mat();
     //k1.calc_gradient(instances);
@@ -167,6 +180,15 @@ int main(int argc, char* argv[]){
     //k1.print_solution();
     //k.get_solution(instances);
     k1.print_solution(fout);
+
+    // cost test
+    cout << "after cost: " << nei.calc_cost(instances ,nets) << endl;
+    vector<vector<int>> toptop2;
+    vector<vector<int>> botbot2;
+    nei.place_instance_to_each_row(instances, toptop2, botbot2);
+    nei.sort_row(toptop2, botbot2);
+    cout << "before penalty: " << nei.init_penalty(instances, toptop2, botbot2) << endl;
+
     delete[] Net;
     fin.close();
     fout.close();
