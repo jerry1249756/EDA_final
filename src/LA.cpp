@@ -102,6 +102,16 @@ void Matrix::PLU_decomposition(Matrix& L, Matrix& U, Matrix& P){ //PA=LU
     return;
 }
 
+void Matrix_scalar(Matrix& A, float scalar){
+    int n=A.size;
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++){
+            A.data[i][j] = A.data[i][j] * scalar;
+        }
+    }
+    return ; 
+}
+
 void Matrix_Addition(Matrix& A, Matrix& B, Matrix& C){
     int n=A.size;
     for(int i=0; i<n; i++){

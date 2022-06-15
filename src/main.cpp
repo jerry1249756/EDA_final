@@ -15,6 +15,7 @@ int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
 int top_row_height;
 int bottom_row_height;
 unsigned long long int TOP_area=0, BOTTOM_area=0;
+int top_die_upper_y, bottom_die_upper_y;
 
 int main(int argc, char* argv[]){
     //read file
@@ -63,7 +64,8 @@ int main(int argc, char* argv[]){
     fin >> trash >> bottom_start_x >> bottom_start_y >> bottom_row_length >> bottom_row_height >> bottom_repeat_count;
     die_rows top_die_rows = {top_start_x, top_start_y, top_row_length, top_row_height, top_repeat_count};
     die_rows bottom_die_rows = {bottom_start_x, bottom_start_y, bottom_row_length, bottom_row_height, bottom_repeat_count};
-
+    top_die_upper_y = top_repeat_count * top_row_height;
+    bottom_die_upper_y = bottom_repeat_count * bottom_row_height;
     fin >> trash >> top_die_tech >> trash >> bottom_die_tech;
     fin >> trash >> terminal_size_x >> terminal_size_y;
     fin >> trash >> terminal_spacing;
@@ -140,15 +142,14 @@ int main(int argc, char* argv[]){
 
     Kraftwerk2 k1(Num_instance,instances);
     //k1.print_solution();
-    k1.get_solution(instances);
-
-    cout << "before cost: " << nei.calc_cost(instances ,nets) << endl;
+    k1.get_solution(instances);    
     vector<vector<int>> toptop;
     vector<vector<int>> botbot;
     nei.place_instance_to_each_row(instances, toptop, botbot);
     nei.sort_row(toptop, botbot);
-    cout << "before penalty: " << nei.init_penalty(instances, toptop, botbot) << endl;
-
+    long long int temp3 = nei.calc_cost(instances ,nets);
+    long long int temp4 = nei.init_penalty(instances, toptop, botbot);
+    k1.input_solution(instances);
     k1.gen_connectivity_matrix(nets);
     //k1.print_mat();
     //k1.calc_gradient(instances);
@@ -174,20 +175,40 @@ int main(int argc, char* argv[]){
         fout << endl;
     }
     
-    k1.print_solution(fout);
-    
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
+    }
+    fout << endl;
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
+    }
+    fout << endl;
     k1.Kraftwerk2_global_placement(instances,fout);
     //k1.print_solution();
     //k.get_solution(instances);
     k1.print_solution(fout);
-
     // cost test
-    cout << "after cost: " << nei.calc_cost(instances ,nets) << endl;
     vector<vector<int>> toptop2;
     vector<vector<int>> botbot2;
     nei.place_instance_to_each_row(instances, toptop2, botbot2);
     nei.sort_row(toptop2, botbot2);
-    cout << "before penalty: " << nei.init_penalty(instances, toptop2, botbot2) << endl;
+    
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
+    }
+    fout << endl;
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
+    }
+    cout << endl;
+    long long int temp = nei.calc_cost(instances ,nets);
+    long long int temp2 = nei.init_penalty(instances, toptop2, botbot2);
+    cout << endl;
+    cout << "before cost: " << temp3 << endl;
+    cout << "after cost: " << temp << endl;
+    cout << "before penalty: " << temp4 << endl;
+    cout << "after penalty: " << temp2 << endl;
+
 
     delete[] Net;
     fin.close();

@@ -28,6 +28,7 @@ class Matrix{
         vector<vector<float>> data;
 };
 
+void Matrix_scalar(Matrix& A, float scalar);
 void Matrix_Addition(Matrix& A, Matrix& B, Matrix& C);
 void Matrix_Vector_Prod(Matrix& A, Vector& v, Vector& c);
 void solve_linear_system(Matrix& P, Matrix& L, Matrix& U, Vector& b, Vector& x);

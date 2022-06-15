@@ -23,10 +23,21 @@ Kraftwerk2::Kraftwerk2(int n, unordered_map<string, instance>& map){ //n: num in
         int acceptable_y_max=0;
         if(it.second.tech == TECH::TECH_A){
             acceptable_x_max = die_upper_x - tech_stack[0].libcells[it.second.libcell_type].width;
-            acceptable_y_max = die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
+            if(it.second.part == PART::TOP){
+                acceptable_y_max = top_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
+            }
+            else{
+                acceptable_y_max = bottom_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
+            }
+            
         }else if(it.second.tech == TECH::TECH_B){
             acceptable_x_max = die_upper_x - tech_stack[1].libcells[it.second.libcell_type].width;
-            acceptable_y_max = die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;
+            if(it.second.part == PART::TOP){
+                acceptable_y_max = top_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
+            }
+            else{
+                acceptable_y_max = bottom_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
+            }
         }
         random_device rd;
         mt19937 gen(rd());
@@ -46,6 +57,14 @@ Kraftwerk2::~Kraftwerk2(){
     delete demand_y;
     delete solution_x;
     delete solution_y;
+}
+
+void Kraftwerk2::input_solution(unordered_map<string, instance>& map){
+    for(auto& it : map){
+        int n = parse_inst_name(it.first);
+        solution_x->data[n] = it.second.instance_pos.x ;
+        solution_y->data[n] = it.second.instance_pos.y ;
+    }
 }
 
 //D should be a m*n zero matrix
@@ -73,10 +92,18 @@ void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>
                 initial_y = (pos_y - float(delta/2))/delta + 1;
             for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
                 for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
-                    if(i >= (die_upper_x-die_lower_x) / delta || j >= (die_upper_y-die_lower_y) / delta || i < 0 || j < 0){
-                        continue;
+                    if(it->second.part == PART::TOP){    
+                        if(i >= (die_upper_x-die_lower_x) / delta || j >= (top_die_upper_y) / delta || i < 0 || j < 0){
+                            continue;
+                        }
+                        D[i][j] += 1*d_mod;
                     }
-                    D[i][j] += 1*d_mod;
+                    else{
+                        if(i >= (die_upper_x-die_lower_x) / delta || j >= (bottom_die_upper_y) / delta || i < 0 || j < 0){
+                            continue;
+                        }
+                        D[i][j] += 1*d_mod;
+                    }
                 }
             }
         }   
@@ -97,10 +124,18 @@ void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>
                 initial_y = (pos_y - float(delta/2))/delta + 1;
             for(int i = initial_x; i <= int((pos_x + width)-float(delta)/2)/delta; i++){
                 for(int j = initial_y; j <= int((pos_y + height -float(delta)/2)/delta); j++){
-                    if(i >= (die_upper_x-die_lower_x) / delta || j >= (die_upper_y-die_lower_y) / delta || i < 0 || j < 0){
-                        continue;
+                    if(it->second.part == PART::TOP){    
+                        if(i >= (die_upper_x-die_lower_x) / delta || j >= (top_die_upper_y) / delta || i < 0 || j < 0){
+                            continue;
+                        }
+                        D[i][j] += 1*d_mod;
                     }
-                    D[i][j] += 1*d_mod;
+                    else{
+                        if(i >= (die_upper_x-die_lower_x) / delta || j >= (bottom_die_upper_y) / delta || i < 0 || j < 0){
+                            continue;
+                        }
+                        D[i][j] += 1*d_mod;
+                    }
                 }
             }
         }
@@ -266,7 +301,7 @@ void Kraftwerk2::print_solution(fstream& fout){
     return;
 }
 
-pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, float x, float y){
+pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, float x, float y, PART part){
     int delta = min(top_row_height,bottom_row_height);
     //(x,y) is in (i,j) , (i+1,j+1)
     int i = static_cast<int>(x/delta-0.5); //bounding box
@@ -274,9 +309,16 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
     float slope = 1;
     //cout << i << " " << j << endl;
     float val, grad_x, grad_y;
-    if(i >= (die_upper_x-die_lower_x)/delta-1 || i<=0 || j >= (die_upper_y-die_lower_y)/delta-1 || j<=0){
+    int temp_upper_y = 0;
+    if(part == PART::TOP){
+        temp_upper_y = top_die_upper_y + die_lower_y;
+    }
+    else{
+        temp_upper_y = bottom_die_upper_y + die_lower_y;
+    }
+    if(i >= (die_upper_x-die_lower_x)/delta-1 || i<=0 || j >= (temp_upper_y-die_lower_y)/delta-1 || j<=0){
         if(i >= (die_upper_x-die_lower_x)/delta-1){ //right border
-            if(j >= (die_upper_y-die_lower_y)/delta-1){ // top border
+            if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
                 grad_x = slope;
                 grad_y = slope;
             }else if(j<=0){
@@ -296,7 +338,7 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
                 }
             }
         }else if(i<=0){ //left border
-            if(j >= (die_upper_y-die_lower_y)/delta-1){ // top border
+            if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
                 grad_x = -1*slope;
                 grad_y = slope;
             }else if(j<=0){
@@ -315,12 +357,12 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
                     grad_y = (phi[i][l] - val)/(w2*delta);
                 }
             }
-        }else if(j >= (die_upper_y-die_lower_y)/delta-1){ // top border mid
+        }else if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border mid
             grad_y = slope;
             float l1 = x - delta*(i+0.5);
             float l2 = delta*(i+1.5) - x;
             int k = (x/delta-i >= 0.5) ? i+1 : i;
-            j = (die_upper_y-die_lower_y)/delta-1;
+            j = (temp_upper_y-die_lower_y)/delta-1;
             if(k==i){
                 grad_x = (val - phi[k][j])/(delta*l1);
             }else{
@@ -411,7 +453,8 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
             height = tech_stack[1].libcells[it.second.libcell_type].height;
         }
 
-        pair<float,float> p = single_point_gradient(phi,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2);
+        
+        pair<float,float> p = single_point_gradient(phi,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
         
         demand_x->data[n] = p.first;
         demand_y->data[n] = p.second;
@@ -426,10 +469,19 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
 
 }
 
-void Kraftwerk2::update_pos_diff(){
+void Kraftwerk2::update_pos_diff(int phase){
     Matrix C_x(size), C_y(size), P_x(size), L_x(size), U_x(size), P_y(size), L_y(size), U_y(size);
-    Matrix_Addition(*connectivity_mat, *move_force_mat_x, C_x);
-    Matrix_Addition(*connectivity_mat, *move_force_mat_y, C_y);
+    Matrix temp = *connectivity_mat;
+    float scalar = 0.05;
+    if(phase == 1){
+        Matrix_scalar(*move_force_mat_x,scalar);
+        Matrix_scalar(*move_force_mat_y,scalar);
+    }
+    else{
+        Matrix_scalar(temp,scalar);
+    }
+    Matrix_Addition(temp, *move_force_mat_x, C_x);
+    Matrix_Addition(temp, *move_force_mat_y, C_y);
     C_x.PLU_decomposition(L_x, U_x, P_x);
     C_y.PLU_decomposition(L_y, U_y, P_y);
     /*
@@ -443,8 +495,8 @@ void Kraftwerk2::update_pos_diff(){
     solve_linear_system(P_x, L_x, U_x, *demand_x, delta_x);
     solve_linear_system(P_y, L_y, U_y, *demand_y, delta_y);
     for(int i=0; i<size; i++){
-        solution_x->data[i] -= 15*delta_x.data[i];
-        solution_y->data[i] -= 15*delta_y.data[i];
+        solution_x->data[i] -= 10*delta_x.data[i];
+        solution_y->data[i] -= 10*delta_y.data[i];
     }
     /*
     for(int i = 0; i<size; i++)
@@ -455,9 +507,14 @@ void Kraftwerk2::update_pos_diff(){
 }
 
 void Kraftwerk2::Kraftwerk2_global_placement(unordered_map<string,instance>& ins, fstream& fout){
-    for(int i=0; i<30; i++){
+    for(int i=0; i<40; i++){
+        int phase;
         calc_gradient(ins,fout);
-        update_pos_diff();
+        if(i < 30)
+            phase = 1;
+        else
+            phase = 2;
+        update_pos_diff(phase);
         //print_solution(fout);
     }
     get_solution(ins);

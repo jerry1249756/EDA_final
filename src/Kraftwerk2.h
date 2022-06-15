@@ -14,6 +14,7 @@ class Kraftwerk2{
     public:
         Kraftwerk2(int, unordered_map<string, instance>&);
         ~Kraftwerk2();
+        void input_solution(unordered_map<string, instance>&);
         void cal_D(unordered_map<string,instance>,vector<vector<float>>&);//int 0 represent top, int 1 represent bottom
         void cal_phi(vector<vector<float>>, vector<vector<float>>&,int);
         int parse_inst_name(string);
@@ -21,9 +22,9 @@ class Kraftwerk2{
         void print_mat();
         void print_solution(fstream&);
         void get_solution(unordered_map<string, instance>&);
-        pair<float, float> single_point_gradient(vector<vector<float>>, float, float);
+        pair<float, float> single_point_gradient(vector<vector<float>>, float, float, PART);
         void calc_gradient(unordered_map<string, instance>, fstream&); //C^O
-        void update_pos_diff(); //delta_x
+        void update_pos_diff(int); //delta_x
         void Kraftwerk2_global_placement(unordered_map<string,instance>&,fstream&); //main algorithm
         
     private:
