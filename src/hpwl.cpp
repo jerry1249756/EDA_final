@@ -1,4 +1,4 @@
-#include "Neighborhood.h"
+#include "hpwl.h"
 #include <string>
 
 extern int Num_net, Num_instance;
@@ -42,7 +42,7 @@ nets find_connected(int num){
 long long int calc_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets){
     long long int total_cost = 0;
     for(int i=0; i<Num_net; i++){
-        single_net_cost(instances, nets, "N"+to_string(i+1));
+        single_net_cost(&instances, nets, "N"+to_string(i+1));
         total_cost += nets["N"+to_string(i+1)]->cost;
     }
     return total_cost;
@@ -50,24 +50,16 @@ long long int calc_cost(unordered_map<string, instance>& instances, unordered_ma
 
 void single_net_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, string netname){
     SingleNet_cost = 0;
-    int TopDie_rightmost;
-    int TopDie_leftmost;
-    int TopDie_topmost;
-    int TopDie_bottommost;
-    int BottomDie_rightmost;
-    int BottomDie_leftmost;
-    int BottomDie_topmost;
-    int BottomDie_bottommost;
+    TopDie_rightmost = INT32_MIN;
+    TopDie_leftmost = INT32_MAX;
+    TopDie_topmost = INT32_MIN;
+    TopDie_bottommost = INT32_MAX;
+    BottomDie_rightmost = INT32_MIN;
+    BottomDie_leftmost = INT32_MAX;
+    BottomDie_topmost = INT32_MIN;
+    BottomDie_bottommost = INT32_MAX;
     int netsize = nets[netname]->net_pin.size();
     for(int i=0; i<netsize; i++){
-        TopDie_rightmost = INT32_MIN;
-        TopDie_leftmost = INT32_MAX;
-        TopDie_topmost = INT32_MIN;
-        TopDie_bottommost = INT32_MAX;
-        BottomDie_rightmost = INT32_MIN;
-        BottomDie_leftmost = INT32_MAX;
-        BottomDie_topmost = INT32_MIN;
-        BottomDie_bottommost = INT32_MAX;
         if(instances[nets[netname]->net_pin[i].INSTANCE].part == PART::TOP){  // this instance belongs to TOP
             point pin_pos = tech_stack[toptech].libcells[instances[nets[netname]->net_pin[i].INSTANCE].libcell_type].pins[nets[netname]->net_pin[i].PIN].pin_pos;
             point ins_pos = instances[nets[netname]->net_pin[i].INSTANCE].instance_pos;
@@ -99,7 +91,7 @@ void single_net_cost(unordered_map<string, instance>& instances, unordered_map<s
     nets[netname]->cost = SingleNet_cost;
 }
 
-void place_instance_to_each_row(unordered_map<string, instance>& instances, vector<vector<int>>& topdie_row, vector<vector<int>>& bottomdie_row){
+void place_instance_to_each_row(unordered_map<string, instance> instances, vector<vector<int>>& topdie_row, vector<vector<int>>& bottomdie_row){
     topdie_row.resize(top_repeat_count);
     bottomdie_row.resize(bottom_repeat_count);
     for(int i=0; i<Num_instance; i++){
@@ -130,7 +122,7 @@ void sort_single_row(vector<vector<int>>& die_row, int row){
     sort(die_row[row].begin(), die_row[row].begin+die_row[row].size(), row_compare);
 }
 
-int single_row_penalty(vector<vector<int>>& die_row, int row){
+int single_row_penalty(vector<vector<int>> die_row, int row){
     int init_penalty = 0;
     if(die_row[row].size()>0){
         if(die_row[row][0].PART == PART::TOP){
@@ -163,7 +155,7 @@ int single_row_penalty(vector<vector<int>>& die_row, int row){
     return init_penalty;
 }
 
-long long int init_penalty(vector<vector<int>>& topdie_row, vector<vector<int>>& bottomdie_row){
+long long int init_penalty(vector<vector<int>> topdie_row, vector<vector<int>> bottomdie_row){
     long long int init_penalty = 0;
     for(int i=0; i<top_repeat_count; i++){
         for(int j=0; j<topdie_row[i].size()-1; j++){
@@ -220,7 +212,7 @@ void two_die_swap_instance(int from, int to){
     find_tech(to) = temp_tech;
 }
 
-int swap_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_row, int to_col){
+int swap_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>> die_row, int from_row, int from_col, int to_row, int to_col){
     int cost = 0;
     int before, after;
     vector<string> netname;
@@ -245,7 +237,7 @@ int swap_cost(unordered_map<string, instance>& instances, unordered_map<string, 
     return cost;
 }
 
-int two_die_swap_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
+int two_die_swap_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>> from_die_row, vector<vector<int>> to_die_row, int from_row, int from_col, int to_row, int to_col){
     int cost = 0;
     int before, after;
     vector<string> netname;
@@ -270,7 +262,7 @@ int two_die_swap_cost(unordered_map<string, instance>& instances, unordered_map<
     return cost;
 }
 
-int move_in_row_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
+int move_in_row_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>> die_row, int from_row, int from_col, int to_x){
     int cost = 0;
     int before, after;
     int temp_x;
@@ -286,7 +278,7 @@ int move_in_row_cost(unordered_map<string, instance>& instances, unordered_map<s
     return cost;
 }
 
-int move_between_row_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
+int move_between_row_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>> die_row, int from_row, int from_col, int to_y){
     int cost = 0;
     int before, after;
     int temp_y;
@@ -303,7 +295,7 @@ int move_between_row_cost(unordered_map<string, instance>& instances, unordered_
     return cost;
 }
 
-int two_die_move_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col){
+int two_die_move_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets, vector<vector<int>> from_die_row, vector<vector<int>> to_die_row, int from_row, int from_col){
     int cost = 0;
     int before, after;
     int temp_y;
@@ -328,7 +320,7 @@ int two_die_move_cost(unordered_map<string, instance>& instances, unordered_map<
     return cost;
 } 
 
-void update_swap(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
+void update_swap(vector<vector<int>> from_die_row, vector<vector<int>> to_die_row, int from_row, int from_col, int to_row, int to_col){
     two_die_swap_instance(from_die_row[from_row][from_col], to_die_row[to_row][to_col]);
     from_die_row[from_row].push_back(to_die_row[to_row][to_col]);
     to_die_row[to_row].push_back(from_die_row[from_row][from_col]);
@@ -338,12 +330,12 @@ void update_swap(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_
     sort_single_row(to_die_row, to_row);
 }
 
-void update_move_in_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
+void update_move_in_row(vector<vector<int>> die_row, int from_row, int from_col, int to_x){
     find_pos_x(die_row[from_row][from_col]) = to_x;
     sort_single_row(die_row, from_row);
 }
 
-void update_move_between_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
+void update_move_between_row(vector<vector<int>> die_row, int from_row, int from_col, int to_y){
     if(find_part(die_row[from_row][from_col] == PART::TOP)){
         find_pos_y(die_row[from_row][from_col]) = to_y/top_row_height*top_row_height;
         die_row[find_pos_y(die_row[from_row][from_col])/top_row_height].push_back(die_row[from_row][from_col]);
@@ -358,7 +350,7 @@ void update_move_between_row(vector<vector<int>>& die_row, int from_row, int fro
     sort(die_row, from_row);
 }
 
-void update_two_die_move(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col){
+void update_two_die_move(vector<vector<int>> from_die_row, vector<vector<int>> to_die_row, int from_row, int from_col){
     if(find_part(from_die_row[from_row][from_col]) == PART::TOP){
         find_pos_y(from_die_row[from_row][from_col]) = to_y/bottom_row_height*bottom_row_height;
         to_die_row[find_pos_y(from_die_row[from_row][from_col])/bottom_row_height].push_back(from_die_row[from_row][from_col]);
@@ -381,3 +373,65 @@ void update_two_die_move(vector<vector<int>>& from_die_row, vector<vector<int>>&
     from_die_row[from_row].erase(from_die_row[from_row].begin()+from_col);
     sort(from_die_row, from_row);
 }
+
+// int swap_penalty(vector<vector<int>> die_row, int from_row, int from_col, int to_row, int to_col){
+//     int before = single_row_penalty(die_row, from_row) + single_row_penalty(die_row, to_row);
+//     swap_instance(die_row[from_row][from_col], die_row[to_row][to_col]);
+//     int after = single_row_penalty(die_row, from_row) + single_row_penalty(die_row, to_row);
+//     return after - before;
+// }
+
+// int two_die_swap_penalty(vector<vector<int>> from_die_row, vector<vector<int>> to_die_row, int from_row, int from_col, int to_row, int to_col){
+//     int before = single_row_penalty(from_die_row, from_row) + single_row_penalty(to_die_row, to_row);
+//     two_die_swap_instance(from_die_row[from_row][from_col], to_die_row[to_row][to_col]);
+//     int after = single_row_penalty(from_die_row, from_row) + single_row_penalty(to_die_row, to_row);
+//     return after - before;
+// }
+
+// int move_in_row_penalty(vector<vector<int>> die_row, int from_row, int from_col, int to_x){
+//     int temp_x = find_pos_x(die_row[from_row][from_col]);
+//     int before = single_row_penalty(die_row, from_row);
+//     find_pos_x(die_row[from_row][from_col]) = to_x;
+//     int after = single_row_penalty(die_row, from_row);
+//     find_pos_x(die_row[from_row][from_col]) = temp_x;
+//     return after - before;
+// }
+
+// int move_between_row_penalty(vector<vector<int>> die_row, int from_row, int from_col, int to_y){
+//     int temp_y = find_pos_y(die_row[from_row][from_col]);
+//     int before, after;
+//     if(find_part(die_row[from_row][from_col]) == PART::TOP){
+//         before = single_row_penalty(die_row, from_row) + single_row_penalty(die_row, to_y/top_row_height);
+//         find_pos_y(die_row[from_row][from_col]) = to_y/top_row_height*top_row_height;
+//         after = single_row_penalty(die_row, from_row) + single_row_penalty(die_row, to_y/top_row_height);
+//     }
+//     else{
+//         before = single_row_penalty(die_row, from_row) + single_row_penalty(die_row, to_y/bottom_row_height);
+//         find_pos_y(die_row[from_row][from_col]) = to_y/bottom_row_height*bottom_row_height;
+//         after = single_row_penalty(die_row, from_row) + single_row_penalty(die_row, to_y/bottom_row_height);
+//     }
+//     return after - before;
+// }
+
+// int two_die_move_penalty(vector<vector<int>> from_die_row, vector<vector<int>> to_die_row, int from_row, int from_col){
+//     TECH temp = find_tech(from_die_row[from_row][from[col]]);
+//     for(int i=0; i<to_die.size(); i++){
+//         if(to_die[i].size>0){
+//             if(find_tech(to_die_row[i][0]) == TECH::TECH_A) find_tech(from_die_row[from_row][from_col]) = TECH::TECH_A;
+//             else find_tech(from_die_row[from_row][from_col]) = TECH::TECH_B;
+//             break;
+//         }
+//     }
+//     int temp_y = find_pos_y(from_die_row[from_row][from_col]);
+//     int before, after;
+//     if(find_part(from_die_row[from_row][from_col]) == PART::TOP){
+//         find_part(from_die_row[from_row][from_col]) = PART::BOTTOM;
+//         find_pos_y(from_die_row[from_row][from_col]) = find_pos_y(from_die_row[from_row][from_col])/bottom_row_height*bottom_row_height;
+//         before = single_row_penalty(to_die_row, find_pos_y(from_die_row[from_row][from_col])/bottom_row_height) + single_row_penalty(from_die_row, from_row);
+//     }
+//     else{
+//         find_part(from_die_row[from_row][from_col]) = PART::TOP;
+//         find_pos_y(from_die_row[from_row][from_col]) = find_pos_y(from_die_row[from_row][from_col])/top_row_height*top_row_height;
+//     }
+    
+// }

@@ -16,7 +16,13 @@
     "cmath": "cpp",
     "dense": "cpp",
     "xutility": "cpp",
-    "string": "cpp"
+    "string": "cpp",
+    "array": "cpp",
+    "deque": "cpp",
+    "string_view": "cpp",
+    "initializer_list": "cpp",
+    "*.tcc": "cpp",
+    "typeinfo": "cpp"
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }

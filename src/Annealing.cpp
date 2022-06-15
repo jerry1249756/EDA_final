@@ -4,7 +4,7 @@ void control_alpha(int later_cost, int ori_cost){
     return 0.85; // need to test, linear about later_cost and ori_cost 
 }
 
-void annealing(neighborhood nei, unorder_map<string,instance>& ins, unorder_map<string,net> nets){
+void annealing(neighborhood nei, unorder_map<string,instance>& ins, unorder_map<string,net*> nets){
     float T; //need to test
     float frozen_T; //need to test
     int innerloop = 0; //need to test

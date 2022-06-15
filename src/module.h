@@ -81,6 +81,7 @@ class net{
         string Net_name;
         vector<ip> net_pin;
         void add_ip(string, string, unordered_map<string, instance>&);
+        int cost;
 };
 
 int manhat_dist(point, point);
