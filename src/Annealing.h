@@ -1,13 +1,19 @@
 #ifndef Annealing_H
 #define Annealing_H
 #include "Neighborhood.h"
-#include "hpwl.h"
+#include "extern.h"
+#include "iostream"
 #include <unordered_map>
+#include <cmath>
+#include <random>
+#include <fstream>
+using namespace std;
 
 float control_alpha(int,int);
 void annealing(Neighborhood, 
-               unorder_map<string,instance>&, 
-               unorder_map<string,net*>);
+               unordered_map<string,instance>&, 
+               unordered_map<string,net*>&,
+               fstream&);
 
 
 #endif

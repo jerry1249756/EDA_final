@@ -13,6 +13,8 @@ typedef pair<string,string> ip;
 #define INSTANCE first 
 #define PIN second
 
+typedef pair<int,int> distribution;
+
 class net;
 
 class point{
@@ -82,6 +84,9 @@ class net{
         vector<ip> net_pin;
         void add_ip(string, string, unordered_map<string, instance>&);
         int cost;
+        distribution dist;
+        bool is_cut();
+        point terminal_pos = point(0,0);
 };
 
 int manhat_dist(point, point);

@@ -68,7 +68,7 @@ void Kraftwerk2::input_solution(unordered_map<string, instance>& map){
 }
 
 //D should be a m*n zero matrix
-void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>& D){
+void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>& D_top, vector<vector<float>>& D_bottom){
     //region = 0 represent top, region = 1 represent bottom
     int delta = min(top_row_height,bottom_row_height);
     float d_mod = 1;
@@ -96,13 +96,13 @@ void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>
                         if(i >= (die_upper_x-die_lower_x) / delta || j >= (top_die_upper_y) / delta || i < 0 || j < 0){
                             continue;
                         }
-                        D[i][j] += 1*d_mod;
+                        D_top[i][j] += 1*d_mod;
                     }
                     else{
                         if(i >= (die_upper_x-die_lower_x) / delta || j >= (bottom_die_upper_y) / delta || i < 0 || j < 0){
                             continue;
                         }
-                        D[i][j] += 1*d_mod;
+                        D_bottom[i][j] += 1*d_mod;
                     }
                 }
             }
@@ -128,13 +128,13 @@ void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>
                         if(i >= (die_upper_x-die_lower_x) / delta || j >= (top_die_upper_y) / delta || i < 0 || j < 0){
                             continue;
                         }
-                        D[i][j] += 1*d_mod;
+                        D_top[i][j] += 1*d_mod;
                     }
                     else{
                         if(i >= (die_upper_x-die_lower_x) / delta || j >= (bottom_die_upper_y) / delta || i < 0 || j < 0){
                             continue;
                         }
-                        D[i][j] += 1*d_mod;
+                        D_bottom[i][j] += 1*d_mod;
                     }
                 }
             }
@@ -142,117 +142,216 @@ void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>
     }
     for(int i = 0; i < D.size(); i++){
         for(int j = 0; j < D[i].size(); j++){
-             D[i][j] -= d_mod * static_cast<float>(TOP_area+BOTTOM_area)/(2*die_area);
+            D_top[i][j] -= d_mod * static_cast<float>(TOP_area+BOTTOM_area)/(2*die_area);
+            D_bottom[i][j] -= d_mod * static_cast<float>(TOP_area+BOTTOM_area)/(2*die_area);
         }
     }
 }
 
 //phi should be m*n zero matrix
-void Kraftwerk2::cal_phi(vector<vector<float>> D, vector<vector<float>>& phi, int times){
+void Kraftwerk2::cal_phi(vector<vector<float>> D_top, vector<vector<float>>& phi_top,vector<vector<float>> D_bottom, vector<vector<float>>& phi_bottom, int times){
     int delta = min(top_row_height,bottom_row_height);
     vector<vector<float>> temp;
     vector<vector<float>> temp3;
-    temp.reserve(phi.size());
-    temp3.reserve(phi.size());
-    for(int i = 0; i < phi.size(); i++){
+    temp.reserve(phi_top.size());
+    temp3.reserve(phi_top.size());
+    temp5.reserve(phi_top.size());
+    temp7.reserve(phi_top.size());
+    for(int i = 0; i < phi_top.size(); i++){
         vector<float> temp2;
         vector<float> temp4;
-        temp2.reserve(phi[i].size());
-        temp4.reserve(phi[i].size());
-        for(int j = 0; j < phi[i].size(); j++){
+        temp2.reserve(phi_top[i].size());
+        temp4.reserve(phi_top[i].size());
+        temp6.reserve(phi_top[i].size());
+        temp8.reserve(phi_top[i].size());
+        for(int j = 0; j < phi_top[i].size(); j++){
             temp2.push_back(0);
             temp4.push_back(0);
+            temp6.push_back(0);
+            temp8.push_back(0);
         }
         temp.push_back(temp2);
         temp3.push_back(temp4);
+        temp5.push_back(temp6);
+        temp7.push_back(temp8);
     }
     for(int k = 0; k < times; k++){
         if(k%2 == 0){
-            for(int i = 0; i < phi.size(); i++){
-                for(int j = 0; j < phi[i].size(); j++){
+            for(int i = 0; i < phi_top.size(); i++){
+                for(int j = 0; j < phi_top[i].size(); j++){
                     if(i == 0){
                         if(j == 0){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i+1][j] + temp[i][j+1]) / 2; 
+                            temp3[i][j] = (delta*delta*D_top[i][j] + temp[i+1][j] + temp[i][j+1]) / 2; 
                         }
-                        else if(j == phi[i].size()-1){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i+1][j] + temp[i][j-1]) / 2; 
+                        else if(j == phi_top[i].size()-1){
+                            temp3[i][j] = (delta*delta*D_top[i][j] + temp[i+1][j] + temp[i][j-1]) / 2; 
                         }
                         else{
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i+1][j]*2) / 4;
+                            temp3[i][j] = (delta*delta*D_top[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i+1][j]*2) / 4;
                         }
                     }
-                    else if(i == phi.size()-1){
+                    else if(i == phi_top.size()-1){
                         if(j == 0){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j+1]) / 2; 
+                            temp3[i][j] = (delta*delta*D_top[i][j] + temp[i-1][j] + temp[i][j+1]) / 2; 
                         }
-                        else if(j == phi[i].size()-1){
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j-1]) / 2; 
+                        else if(j == phi_top[i].size()-1){
+                            temp3[i][j] = (delta*delta*D_top[i][j] + temp[i-1][j] + temp[i][j-1]) / 2; 
                         }
                         else{
-                            temp3[i][j] = (delta*delta*D[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i-1][j]*2) / 4;
+                            temp3[i][j] = (delta*delta*D_top[i][j] + temp[i][j-1] + temp[i][j+1] + temp[i-1][j]*2) / 4;
                         }
                     }
                     else if(j == 0){
-                        temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i][j+1]*2 + temp[i+1][j]) / 4;
+                        temp3[i][j] = (delta*delta*D_top[i][j] + temp[i-1][j] + temp[i][j+1]*2 + temp[i+1][j]) / 4;
                     }
-                    else if(j == phi[i].size()-1){
-                        temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i+1][j] + temp[i][j-1]*2) / 4; 
+                    else if(j == phi_top[i].size()-1){
+                        temp3[i][j] = (delta*delta*D_top[i][j] + temp[i-1][j] + temp[i+1][j] + temp[i][j-1]*2) / 4; 
                     }
                     else{
-                        temp3[i][j] = (delta*delta*D[i][j] + temp[i-1][j] + temp[i+1][j] + temp[i][j-1] + temp[i][j+1]) / 4; 
+                        temp3[i][j] = (delta*delta*D_top[i][j] + temp[i-1][j] + temp[i+1][j] + temp[i][j-1] + temp[i][j+1]) / 4; 
                     }
                 }
             }
         }
         else if(k%2 == 1){
-            for(int i = 0; i < phi.size(); i++){
-                for(int j = 0; j < phi[i].size(); j++){
+            for(int i = 0; i < phi_top.size(); i++){
+                for(int j = 0; j < phi_top[i].size(); j++){
                     if(i == 0){
                         if(j == 0){
-                            temp[i][j] = (delta*D[i][j] + temp3[i+1][j] + temp3[i][j+1]) / 4; 
+                            temp[i][j] = (delta*D_top[i][j] + temp3[i+1][j] + temp3[i][j+1]) / 4; 
                         }
-                        else if(j == phi[i].size()-1){
-                            temp[i][j] = (delta*D[i][j] + temp3[i+1][j] + temp3[i][j-1]) / 4; 
+                        else if(j == phi[i]_top.size()-1){
+                            temp[i][j] = (delta*D_top[i][j] + temp3[i+1][j] + temp3[i][j-1]) / 4; 
                         }
                         else{
-                            temp[i][j] = (delta*D[i][j] + temp3[i][j-1] + temp3[i][j+1] + temp3[i+1][j]) / 4;
+                            temp[i][j] = (delta*D_top[i][j] + temp3[i][j-1] + temp3[i][j+1] + temp3[i+1][j]) / 4;
                         }
                     }
-                    else if(i == phi.size()-1){
+                    else if(i == phi_top.size()-1){
                         if(j == 0){
-                            temp[i][j] = (delta*D[i][j] + temp3[i-1][j] + temp3[i][j+1]) / 4; 
+                            temp[i][j] = (delta*D_top[i][j] + temp3[i-1][j] + temp3[i][j+1]) / 4; 
                         }
-                        else if(j == phi[i].size()-1){
-                            temp[i][j] = (delta*D[i][j] + temp3[i-1][j] + temp3[i][j-1]) / 4; 
+                        else if(j == phi_top[i].size()-1){
+                            temp[i][j] = (delta*D_top[i][j] + temp3[i-1][j] + temp3[i][j-1]) / 4; 
                         }
                         else{
-                            temp[i][j] = (delta*D[i][j] + temp3[i][j-1] + temp3[i][j+1] + temp3[i-1][j]) / 4;
+                            temp[i][j] = (delta*D_top[i][j] + temp3[i][j-1] + temp3[i][j+1] + temp3[i-1][j]) / 4;
                         }
                     }
                     else if(j == 0){
-                        temp[i][j] = (delta*D[i][j] + temp3[i-1][j] + temp3[i][j+1] + temp3[i+1][j]) / 4;
+                        temp[i][j] = (delta*D_top[i][j] + temp3[i-1][j] + temp3[i][j+1] + temp3[i+1][j]) / 4;
                     }
-                    else if(j == phi[i].size()-1){
-                        temp[i][j] = (delta*D[i][j] + temp3[i-1][j] + temp3[i+1][j] + temp3[i][j-1]) / 4; 
+                    else if(j == phi_top[i].size()-1){
+                        temp[i][j] = (delta*D_top[i][j] + temp3[i-1][j] + temp3[i+1][j] + temp3[i][j-1]) / 4; 
                     }
                     else{
-                        temp[i][j] = (delta*D[i][j] + temp3[i-1][j] + temp3[i+1][j] + temp3[i][j-1] + temp3[i][j+1]) / 4; 
+                        temp[i][j] = (delta*D_top[i][j] + temp3[i-1][j] + temp3[i+1][j] + temp3[i][j-1] + temp3[i][j+1]) / 4; 
                     }
                 }
             }
         }
     }
     if(times%2 == 0){
-        for(int i = 0; i < phi.size(); i++){
-            for(int j = 0; j < phi[i].size(); j++){
-                phi[i][j] = temp[i][j];
+        for(int i = 0; i < phi_top.size(); i++){
+            for(int j = 0; j < phi_top[i].size(); j++){
+                phi_top[i][j] = temp[i][j];
             }
         }
     }
     else if(times%2 == 1){
-        for(int i = 0; i < phi.size(); i++){
-            for(int j = 0; j < phi[i].size(); j++){
-                phi[i][j] = temp3[i][j];
+        for(int i = 0; i < phi_top.size(); i++){
+            for(int j = 0; j < phi_top[i].size(); j++){
+                phi_top[i][j] = temp3[i][j];
+            }
+        }
+    }
+    for(int k = 0; k < times; k++){
+        if(k%2 == 0){
+            for(int i = 0; i < phi_bottom.size(); i++){
+                for(int j = 0; j < phi_bottom[i].size(); j++){
+                    if(i == 0){
+                        if(j == 0){
+                            temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i+1][j] + temp5[i][j+1]) / 2; 
+                        }
+                        else if(j == phi_bottom[i].size()-1){
+                            temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i+1][j] + temp5[i][j-1]) / 2; 
+                        }
+                        else{
+                            temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i][j-1] + temp5[i][j+1] + temp5[i+1][j]*2) / 4;
+                        }
+                    }
+                    else if(i == phi_bottom.size()-1){
+                        if(j == 0){
+                            temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i-1][j] + temp5[i][j+1]) / 2; 
+                        }
+                        else if(j == phi_bottom[i].size()-1){
+                            temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i-1][j] + temp5[i][j-1]) / 2; 
+                        }
+                        else{
+                            temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i][j-1] + temp5[i][j+1] + temp5[i-1][j]*2) / 4;
+                        }
+                    }
+                    else if(j == 0){
+                        temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i-1][j] + temp5[i][j+1]*2 + temp5[i+1][j]) / 4;
+                    }
+                    else if(j == phi_bottom[i].size()-1){
+                        temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i-1][j] + temp5[i+1][j] + temp5[i][j-1]*2) / 4; 
+                    }
+                    else{
+                        temp7[i][j] = (delta*delta*D_bottom[i][j] + temp5[i-1][j] + temp5[i+1][j] + temp5[i][j-1] + temp5[i][j+1]) / 4; 
+                    }
+                }
+            }
+        }
+        else if(k%2 == 1){
+            for(int i = 0; i < phi_bottom.size(); i++){
+                for(int j = 0; j < phi_bottom[i].size(); j++){
+                    if(i == 0){
+                        if(j == 0){
+                            temp5[i][j] = (delta*D_bottom[i][j] + temp7[i+1][j] + temp7[i][j+1]) / 4; 
+                        }
+                        else if(j == phi[i]_bottom.size()-1){
+                            temp5[i][j] = (delta*D_bottom[i][j] + temp7[i+1][j] + temp7[i][j-1]) / 4; 
+                        }
+                        else{
+                            temp5[i][j] = (delta*D_bottom[i][j] + temp7[i][j-1] + temp7[i][j+1] + temp7[i+1][j]) / 4;
+                        }
+                    }
+                    else if(i == phi_bottom.size()-1){
+                        if(j == 0){
+                            temp5[i][j] = (delta*D_bottom[i][j] + temp7[i-1][j] + temp7[i][j+1]) / 4; 
+                        }
+                        else if(j == phi_bottom[i].size()-1){
+                            temp5[i][j] = (delta*D_bottom[i][j] + temp7[i-1][j] + temp7[i][j-1]) / 4; 
+                        }
+                        else{
+                            temp5[i][j] = (delta*D_bottom[i][j] + temp7[i][j-1] + temp7[i][j+1] + temp7[i-1][j]) / 4;
+                        }
+                    }
+                    else if(j == 0){
+                        temp5[i][j] = (delta*D_bottom[i][j] + temp7[i-1][j] + temp7[i][j+1] + temp7[i+1][j]) / 4;
+                    }
+                    else if(j == phi_bottom[i].size()-1){
+                        temp5[i][j] = (delta*D_bottom[i][j] + temp7[i-1][j] + temp7[i+1][j] + temp7[i][j-1]) / 4; 
+                    }
+                    else{
+                        temp5[i][j] = (delta*D_bottom[i][j] + temp7[i-1][j] + temp7[i+1][j] + temp7[i][j-1] + temp7[i][j+1]) / 4; 
+                    }
+                }
+            }
+        }
+    }
+    if(times%2 == 0){
+        for(int i = 0; i < phi_bottom.size(); i++){
+            for(int j = 0; j < phi_bottom[i].size(); j++){
+                phi_bottom[i][j] = temp5[i][j];
+            }
+        }
+    }
+    else if(times%2 == 1){
+        for(int i = 0; i < phi_bottom.size(); i++){
+            for(int j = 0; j < phi_bottom[i].size(); j++){
+                phi_bottom[i][j] = temp7[i][j];
             }
         }
     }
@@ -307,7 +406,7 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
     //(x,y) is in (i,j) , (i+1,j+1)
     int i = static_cast<int>(x/delta-0.5); //bounding box
     int j = static_cast<int>(y/delta-0.5);
-    float slope = 10;
+    float slope = 1;
     //cout << i << " " << j << endl;
     float val, grad_x, grad_y;
     int temp_upper_y = 0;
@@ -519,8 +618,8 @@ void Kraftwerk2::update_pos_diff(int phase){
     // }
     // cout << endl;
      //PLU
-    b_x = Vector_scalar(b_x,0.02);
-    b_y = Vector_scalar(b_y,0.02);
+    b_x = Vector_scalar(b_x,0.03);
+    b_y = Vector_scalar(b_y,0.03);
     solve_linear_system(P_x, L_x, U_x, b_x, delta_x);
     solve_linear_system(P_y, L_y, U_y, b_y, delta_y);
     // solve_linear_system_via_Cholesky(L_x,LT_x,b_x,delta_x);
@@ -539,7 +638,7 @@ void Kraftwerk2::update_pos_diff(int phase){
 }
 
 void Kraftwerk2::Kraftwerk2_global_placement(unordered_map<string,instance>& ins, fstream& fout){
-    for(int i=0; i<20; i++){
+    for(int i=0; i<10; i++){
         int phase;
         calc_gradient(ins,fout);
         if(i < 20)

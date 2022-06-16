@@ -2,9 +2,14 @@
 #include "FM_alg.h"
 #include "module.h"
 #include "Neighborhood.h"
+#include "Annealing.h"
 #include "Kraftwerk2.h"
+#include "Legalization.h"
+#include "place_terminal.h"
 using namespace std;
 
+vector<vector<int>> toptop2;
+vector<vector<int>> botbot2;
 unordered_map<string, instance> instances;
 vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
 unsigned long long int die_area;
@@ -20,8 +25,7 @@ int top_die_upper_y, bottom_die_upper_y;
 int main(int argc, char* argv[]){
     //read file
     fstream fin(argv[1]);
-    fstream fout;
-    fout.open(argv[2]);
+    fstream fout(argv[2]);
     
     string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y;
@@ -130,7 +134,10 @@ int main(int argc, char* argv[]){
     
 
     //fout
-    
+    for(vector<partition_net*>::iterator it =n->begin(); it!=n->end(); ++it){ //assign the distribution
+        nets[(*it)->net_name]->dist.first = (*it)->Dist.first;
+        nets[(*it)->net_name]->dist.second = (*it)->Dist.second;
+    }
 
     delete[] temp_partition;
     delete nodes;
@@ -144,12 +151,8 @@ int main(int argc, char* argv[]){
     Kraftwerk2 k1(Num_instance,instances);
     //k1.print_solution();
     k1.get_solution(instances);    
-    vector<vector<int>> toptop;
-    vector<vector<int>> botbot;
-    nei.place_instance_to_each_row(instances, toptop, botbot);
-    nei.sort_row(toptop, botbot);
     long long int temp3 = nei.calc_cost(instances ,nets);
-    long long int temp4 = nei.init_penalty(instances, toptop, botbot);
+    // long long int temp4 = nei.init_penalty(instances, toptop, botbot);
     k1.input_solution(instances);
     k1.gen_connectivity_matrix(nets);
     //k1.print_mat();
@@ -189,12 +192,12 @@ int main(int argc, char* argv[]){
     //k.get_solution(instances);
     k1.print_solution(fout);
     // cost test
-    vector<vector<int>> toptop2;
-    vector<vector<int>> botbot2;
-    long long int x = nei.calc_cost(instances,nets);
     nei.place_instance_to_each_row(instances, toptop2, botbot2);
     nei.sort_row(toptop2, botbot2);
-    
+    long long int temp = nei.calc_cost(instances ,nets);
+    stretch(toptop2,botbot2);
+    long long int temp5 = nei.calc_cost(instances ,nets);
+
     for(int i = 0; i < Num_instance; i++){
         fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
     }
@@ -202,17 +205,26 @@ int main(int argc, char* argv[]){
     for(int i = 0; i < Num_instance; i++){
         fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
     }
-    cout << endl;
-    long long int temp = nei.calc_cost(instances ,nets);
-    long long int temp2 = nei.init_penalty(instances, toptop2, botbot2);
+    fout << endl;
+    cout << endl; 
+    // long long int temp2 = nei.init_penalty(instances, toptop2, botbot2);
     cout << endl;
     cout << "before cost: " << temp3 << endl;
     cout << "after cost: " << temp << endl;
-    cout << "middle: " << x << endl;
-    cout << "before penalty: " << temp4 << endl;
-    cout << "after penalty: " << temp2 << endl;
+    cout << "after legal cost: " << temp5 << endl;
+    // cout << "before penalty: " << temp4 << endl;
+    // cout << "after penalty: " << temp2 << endl;
 
+    annealing(nei, instances, nets, fout);
+    long long int temp6 = nei.calc_cost(instances ,nets);
+    cout << "after annealing: " << temp6 << endl;
+    stretch(toptop2,botbot2);
+    long long int temp7 = nei.calc_cost(instances ,nets);
+    cout << "final legal cost: " << temp7 << endl; 
 
+    //Terminal placement
+    Terminal_Placment t(terminal_size_x,terminal_size_y,terminal_spacing);
+    t.Thorolfsson_via_assignment(instances,nets);
     delete[] Net;
     fin.close();
     fout.close();

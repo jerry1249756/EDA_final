@@ -32,6 +32,11 @@ void net::add_ip(string inst_name, string pin_name, unordered_map<string, instan
     dict[inst_name].connected_nets.push_back(this);
 }
 
+bool net::is_cut(){  //first: top, second: bottom
+    if(dist.first==0 || dist.second==0) return false;
+    else return true;
+}
+
 int manhat_dist(point a, point b){
     return abs(a.x-b.x)+abs(a.y-b.y);
 }

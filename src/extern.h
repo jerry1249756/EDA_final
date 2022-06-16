@@ -7,6 +7,8 @@
 #include "module.h"
 using namespace std;
 
+extern vector<vector<int>> toptop2;
+extern vector<vector<int>> botbot2;
 extern unordered_map<string, instance> instances;
 extern vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
 extern unsigned long long int die_area;
