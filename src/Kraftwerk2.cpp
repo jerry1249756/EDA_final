@@ -271,6 +271,7 @@ void Kraftwerk2::get_solution(unordered_map<string, instance>& map){
 }
 
 void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
+    int temp = 1;
     cout << "generating connectivity matrix ..\n";
     for(auto& it : map){
         int n =it.second->net_pin.size();
@@ -278,8 +279,8 @@ void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
             for(int j=i+1; j<n; j++){
                 int k = parse_inst_name(it.second->net_pin[i].INSTANCE);
                 int l = parse_inst_name(it.second->net_pin[j].INSTANCE);
-                connectivity_mat->data[k][l] +=1 ;
-                connectivity_mat->data[l][k] +=1 ;
+                connectivity_mat->data[k][l] += temp;
+                connectivity_mat->data[l][k] += temp;
             }
         }
     }
@@ -406,6 +407,7 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
             }
         }
     }
+    
     return make_pair(grad_x, grad_y);
 }
 // calculate the C^O matrix, which is the gradient of the specified points, val stored on diagonal entries. 
@@ -470,18 +472,25 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
 }
 
 void Kraftwerk2::update_pos_diff(int phase){
+    //Cholesky
+    // Matrix C_x(size), C_y(size), LT_x(size), L_x(size), L_y(size), LT_y(size);
+    //PLU
     Matrix C_x(size), C_y(size), P_x(size), L_x(size), U_x(size), P_y(size), L_y(size), U_y(size);
+    //conjugate
+    // Matrix C_x(size), C_y(size);
     Matrix temp = *connectivity_mat;
-    float scalar = 0.05;
-    if(phase == 1){
-        Matrix_scalar(*move_force_mat_x,scalar);
-        Matrix_scalar(*move_force_mat_y,scalar);
-    }
-    else{
-        Matrix_scalar(temp,scalar);
-    }
+    // float scalar = 1;
+    // if(phase == 1){
+    //     Matrix_scalar(*move_force_mat_x,scalar);
+    //     Matrix_scalar(*move_force_mat_y,scalar);
+    // }
+    // else{
+    //     Matrix_scalar(temp,scalar);
+    // }
     Matrix_Addition(temp, *move_force_mat_x, C_x);
     Matrix_Addition(temp, *move_force_mat_y, C_y);
+    // C_x.Cholesky_decomposition(L_x,LT_x);
+    // C_y.Cholesky_decomposition(L_y,LT_y);
     C_x.PLU_decomposition(L_x, U_x, P_x);
     C_y.PLU_decomposition(L_y, U_y, P_y);
     /*
@@ -490,13 +499,36 @@ void Kraftwerk2::update_pos_diff(int phase){
     cout << endl;
     P_y->print_data();
     */
+    Vector b_x(size), b_y(size);
     Vector delta_x(size), delta_y(size);
-    
-    solve_linear_system(P_x, L_x, U_x, *demand_x, delta_x);
-    solve_linear_system(P_y, L_y, U_y, *demand_y, delta_y);
+    Matrix_Vector_Prod(*move_force_mat_x, *demand_x, b_x);
+    Matrix_Vector_Prod(*move_force_mat_y, *demand_y, b_y);
+    //move_force_mat_x->print_data();
+    // for(int i = 0; i < size; i++){
+    //     cout << demand_x->data[i] << " ";
+    // }
+    // cout << endl;
+    // cout << norm(b_x) << endl;
+    // for(int i = 0; i < size; i++){
+    //     cout << b_x.data[i] << " ";
+    // }
+    // delta_x = conjugate_gradient(C_x,b_x);
+    // delta_y = conjugate_gradient(C_y,b_y);
+    // for(int i = 0; i < size; i++){
+    //     cout << delta_x.data[i] << " ";
+    // }
+    // cout << endl;
+     //PLU
+    b_x = Vector_scalar(b_x,0.03);
+    b_y = Vector_scalar(b_y,0.03);
+    solve_linear_system(P_x, L_x, U_x, b_x, delta_x);
+    solve_linear_system(P_y, L_y, U_y, b_y, delta_y);
+    // solve_linear_system_via_Cholesky(L_x,LT_x,b_x,delta_x);
+    // solve_linear_system_via_Cholesky(L_y,LT_y,b_y,delta_y);
+    cout << norm(delta_x) << endl;
     for(int i=0; i<size; i++){
-        solution_x->data[i] -= 10*delta_x.data[i];
-        solution_y->data[i] -= 10*delta_y.data[i];
+        solution_x->data[i] -= delta_x.data[i];
+        solution_y->data[i] -= delta_y.data[i];
     }
     /*
     for(int i = 0; i<size; i++)
@@ -507,16 +539,17 @@ void Kraftwerk2::update_pos_diff(int phase){
 }
 
 void Kraftwerk2::Kraftwerk2_global_placement(unordered_map<string,instance>& ins, fstream& fout){
-    for(int i=0; i<40; i++){
+    for(int i=0; i<10; i++){
         int phase;
         calc_gradient(ins,fout);
-        if(i < 30)
+        if(i < 20)
             phase = 1;
         else
             phase = 2;
         update_pos_diff(phase);
         //print_solution(fout);
     }
+    cout << "global placement finished \n";
     get_solution(ins);
     
 }

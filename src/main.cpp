@@ -20,7 +20,8 @@ int top_die_upper_y, bottom_die_upper_y;
 int main(int argc, char* argv[]){
     //read file
     fstream fin(argv[1]);
-    fstream fout(argv[2]);
+    fstream fout;
+    fout.open(argv[2]);
     
     string trash, Tech_name, Libcell_name, pin_name, instance_name, net_name;
     int NumTechnologies, Num_lib_cell, lib_x, lib_y, Num_pin, pin_x, pin_y;
@@ -190,6 +191,7 @@ int main(int argc, char* argv[]){
     // cost test
     vector<vector<int>> toptop2;
     vector<vector<int>> botbot2;
+    long long int x = nei.calc_cost(instances,nets);
     nei.place_instance_to_each_row(instances, toptop2, botbot2);
     nei.sort_row(toptop2, botbot2);
     
@@ -206,6 +208,7 @@ int main(int argc, char* argv[]){
     cout << endl;
     cout << "before cost: " << temp3 << endl;
     cout << "after cost: " << temp << endl;
+    cout << "middle: " << x << endl;
     cout << "before penalty: " << temp4 << endl;
     cout << "after penalty: " << temp2 << endl;
 
