@@ -22,9 +22,9 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
     for(int i=0; i<top_die_row.size(); i++){
         probeB = 0;
         probeT = top_die_row.size()-1-i;
-        probeL = 0;
+        probeL = die_lower_x;
         probeR = die_upper_x;
-        if(probeT != probeB){
+        if(probeT >= probeB){
             L = 0;
             R = top_die_row[probeT].size()-1;
             while(probeL < probeR && L <= R){
@@ -37,7 +37,7 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
                 }
                 L++;
             }
-            probeL = 0;
+            probeL = die_lower_x;
             L = 0;
             while(probeR > probeL && R >= L){
                 if(instances["C"+to_string(top_die_row[probeT][R])].instance_pos.x + tech_stack[toptech].libcells[instances["C"+to_string(top_die_row[probeT][R])].libcell_type].width <= probeR){
@@ -62,9 +62,9 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
     for(int i=0; i<top_die_row.size(); i++){
         probeB = i;
         probeT = top_die_row.size()-1;
-        probeL = 0;
+        probeL = die_lower_x;
         probeR = die_upper_x;
-        if(probeB != probeT){
+        if(probeB <= probeT){
             L = 0;
             R = top_die_row[probeB].size()-1;
             while(probeL < probeR && L <= R){
@@ -77,7 +77,7 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
                 }
                 L++;
             }
-            probeL = 0;
+            probeL = die_lower_x;
             L = 0;
             while(probeR > probeL && R >= L){
                 if(instances["C"+to_string(top_die_row[probeB][R])].instance_pos.x + tech_stack[toptech].libcells[instances["C"+to_string(top_die_row[probeB][R])].libcell_type].width <= probeR){
@@ -93,7 +93,7 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
                 for(int j=0; j<=R+1; j++){
                     instances["C"+to_string(top_die_row[probeB][0])].instance_pos.y += top_row_height;
                     top_die_row[probeB+1].push_back(top_die_row[probeB][0]);
-                    top_die_row[probeB].erase(top_die_row[probeT].begin());
+                    top_die_row[probeB].erase(top_die_row[probeB].begin());
                 }
                 nei.sort_single_row(top_die_row, probeB+1);
             }
@@ -104,9 +104,9 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
     for(int i=0; i<bottom_die_row.size(); i++){
         probeB = 0;
         probeT = bottom_die_row.size()-1-i;
-        probeL = 0;
+        probeL = die_lower_x;
         probeR = die_upper_x;
-        if(probeT != probeB){
+        if(probeT >= probeB){
             L = 0;
             R = bottom_die_row[probeT].size()-1;
             while(probeL < probeR && L <= R){
@@ -119,7 +119,7 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
                 }
                 L++;
             }
-            probeL = 0;
+            probeL = die_lower_x;
             L = 0;
             while(probeR > probeL && R >= L){
                 if(instances["C"+to_string(bottom_die_row[probeT][R])].instance_pos.x + tech_stack[bottomtech].libcells[instances["C"+to_string(bottom_die_row[probeT][R])].libcell_type].width <= probeR){
@@ -146,7 +146,7 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
         probeT = bottom_die_row.size()-1;
         probeL = 0;
         probeR = die_upper_x;
-        if(probeB != probeT){
+        if(probeB <= probeT){
             L = 0;
             R = bottom_die_row[probeB].size()-1;
             while(probeL < probeR && L <= R){
@@ -159,7 +159,7 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
                 }
                 L++;
             }
-            probeL = 0;
+            probeL = die_lower_x;
             L = 0;
             while(probeR > probeL && R >= L){
                 if(instances["C"+to_string(bottom_die_row[probeB][R])].instance_pos.x + tech_stack[bottomtech].libcells[instances["C"+to_string(bottom_die_row[probeB][R])].libcell_type].width <= probeR){
@@ -175,7 +175,7 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
                 for(int j=0; j<=R+1; j++){
                     instances["C"+to_string(bottom_die_row[probeB][0])].instance_pos.y += bottom_row_height;
                     bottom_die_row[probeB+1].push_back(bottom_die_row[probeB][0]);
-                    bottom_die_row[probeB].erase(bottom_die_row[probeT].begin());
+                    bottom_die_row[probeB].erase(bottom_die_row[probeB].begin());
                 }
                 nei.sort_single_row(bottom_die_row, probeB+1);
             }

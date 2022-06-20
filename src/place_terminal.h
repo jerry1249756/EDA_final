@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
+#include <iostream>
 
 //unordered_map<string, net*> nets
 

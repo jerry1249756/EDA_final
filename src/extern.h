@@ -19,5 +19,6 @@ extern int die_lower_x, die_lower_y, die_upper_x, die_upper_y;
 extern int top_row_height, bottom_row_height;
 extern unsigned long long int TOP_area, BOTTOM_area;
 extern int top_die_upper_y, bottom_die_upper_y;
+extern unordered_map<string, net*> nets;
 
 #endif

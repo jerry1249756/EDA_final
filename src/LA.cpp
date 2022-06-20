@@ -112,16 +112,16 @@ void Matrix::PLU_decomposition(Matrix& L, Matrix& U, Matrix& P){ //PA=LU
 
 void Matrix::Cholesky_decomposition(Matrix& L, Matrix& L_T){ //asserting L is zero matrix
     int n = size;
-    for(int i=0; i<n; i++){
-        for(int k=0; k<i; k++){
+    for(int i=0; i<n; ++i){
+        for(int k=0; k<i; ++k){
             float val = data[i][k];
-            for(int j=0; j<k ;j++){
-                val -= data[i][j]*data[k][j];
+            for(int j=0; j<k ; ++j){
+                val -= L.data[i][j]*L.data[k][j];
             }
-            L.data[i][k] = val/data[k][k];
+            L.data[i][k] = val/L.data[k][k];
         }
         float val2 = data[i][i];
-        for(int j=0; j<i; j++){
+        for(int j=0; j<i; ++j){
             val2 -= L.data[i][j]*L.data[i][j];
         }
         L.data[i][i] = sqrt(val2);

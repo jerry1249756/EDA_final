@@ -113,9 +113,9 @@ void Neighborhood::place_instance_to_each_row(unordered_map<string, instance>& i
                 random_device rd;
                 mt19937 gen(rd());
                 uniform_int_distribution<> distrib_x(die_lower_x,acceptable_x_max);
-                uniform_int_distribution<> distrib_y(die_lower_y,acceptable_y_max);
+                uniform_int_distribution<> distrib_y(0,top_repeat_count-1);
                 instances["C"+to_string(i+1)].instance_pos.x = distrib_x(gen);
-                instances["C"+to_string(i+1)].instance_pos.y = distrib_y(gen);
+                instances["C"+to_string(i+1)].instance_pos.y = distrib_y(gen) * top_row_height + die_lower_y;
             } 
             else instances["C"+to_string(i+1)].instance_pos.y = static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*top_row_height)/top_row_height)*top_row_height; //move to closest row
             topdie_row[static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*top_row_height)/top_row_height)].push_back(i+1);
@@ -136,9 +136,9 @@ void Neighborhood::place_instance_to_each_row(unordered_map<string, instance>& i
                 random_device rd;
                 mt19937 gen(rd());
                 uniform_int_distribution<> distrib_x(die_lower_x,acceptable_x_max);
-                uniform_int_distribution<> distrib_y(die_lower_y,acceptable_y_max);
+                uniform_int_distribution<> distrib_y(0, bottom_repeat_count-1);
                 instances["C"+to_string(i+1)].instance_pos.x = distrib_x(gen);
-                instances["C"+to_string(i+1)].instance_pos.y = distrib_y(gen);
+                instances["C"+to_string(i+1)].instance_pos.y = distrib_y(gen) * bottom_row_height + die_lower_y;
             } 
             else instances["C"+to_string(i+1)].instance_pos.y = static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*bottom_row_height)/bottom_row_height)*bottom_row_height; //move to closest row
             bottomdie_row[static_cast<int>(static_cast<double>(find_pos_y(i+1, instances)+0.5*bottom_row_height)/bottom_row_height)].push_back(i+1);
@@ -426,3 +426,59 @@ int Neighborhood::swap_penalty(vector<vector<int>>& from_die_row, vector<vector<
     return after - before;
 }
 
+void Neighborhood::single_net_final_cost(unordered_map<string, instance>& instances, unordered_map<string, net*>& nets, string netname){
+    int SingleNet_cost = 0;
+    int TopDie_rightmost = INT32_MIN;
+    int TopDie_leftmost = INT32_MAX;
+    int TopDie_topmost = INT32_MIN;
+    int TopDie_bottommost = INT32_MAX;
+    int BottomDie_rightmost = INT32_MIN;
+    int BottomDie_leftmost = INT32_MAX;
+    int BottomDie_topmost = INT32_MIN;
+    int BottomDie_bottommost = INT32_MAX;
+    int netsize = nets[netname]->net_pin.size();
+    for(int i=0; i<netsize; i++){
+        point ins_pos = instances[nets[netname]->net_pin[i].INSTANCE].instance_pos;
+        if(instances[nets[netname]->net_pin[i].INSTANCE].part == PART::TOP){  // this instance belongs to TOP
+            point pin_pos = tech_stack[toptech].libcells[instances[nets[netname]->net_pin[i].INSTANCE].libcell_type].pins[nets[netname]->net_pin[i].PIN].pin_pos;
+            if(pin_pos.x+ins_pos.x > TopDie_rightmost) TopDie_rightmost = pin_pos.x+ins_pos.x;
+            if(pin_pos.x+ins_pos.x < TopDie_leftmost) TopDie_leftmost = pin_pos.x+ins_pos.x;
+            if(pin_pos.y+ins_pos.y > TopDie_topmost) TopDie_topmost = pin_pos.y+ins_pos.y;
+            if(pin_pos.y+ins_pos.y < TopDie_bottommost) TopDie_bottommost = pin_pos.y+ins_pos.y;
+        }
+        else{
+            point pin_pos = tech_stack[bottomtech].libcells[instances[nets[netname]->net_pin[i].INSTANCE].libcell_type].pins[nets[netname]->net_pin[i].PIN].pin_pos;
+            if(pin_pos.x+ins_pos.x > BottomDie_rightmost) BottomDie_rightmost = pin_pos.x+ins_pos.x;
+            if(pin_pos.x+ins_pos.x < BottomDie_leftmost) BottomDie_leftmost = pin_pos.x+ins_pos.x;
+            if(pin_pos.y+ins_pos.y > BottomDie_topmost) BottomDie_topmost = pin_pos.y+ins_pos.y;
+            if(pin_pos.y+ins_pos.y < BottomDie_bottommost) BottomDie_bottommost = pin_pos.y+ins_pos.y;
+        }
+    }
+    if(nets[netname]->terminal_pos.x != 0){
+        if(nets[netname]->terminal_pos.x > TopDie_rightmost) TopDie_rightmost = nets[netname]->terminal_pos.x;
+        if(nets[netname]->terminal_pos.x < TopDie_leftmost) TopDie_leftmost = nets[netname]->terminal_pos.x;
+        if(nets[netname]->terminal_pos.y > TopDie_topmost) TopDie_topmost = nets[netname]->terminal_pos.y;
+        if(nets[netname]->terminal_pos.y < TopDie_bottommost) TopDie_bottommost = nets[netname]->terminal_pos.y;
+        if(nets[netname]->terminal_pos.x > BottomDie_rightmost) BottomDie_rightmost = nets[netname]->terminal_pos.x;
+        if(nets[netname]->terminal_pos.x < BottomDie_leftmost) BottomDie_leftmost = nets[netname]->terminal_pos.x;
+        if(nets[netname]->terminal_pos.y > BottomDie_topmost) BottomDie_topmost = nets[netname]->terminal_pos.y;
+        if(nets[netname]->terminal_pos.y < BottomDie_bottommost) BottomDie_bottommost = nets[netname]->terminal_pos.y;
+    }
+
+    if(TopDie_rightmost != INT32_MAX && BottomDie_rightmost != INT32_MAX){
+        SingleNet_cost += (TopDie_rightmost-TopDie_leftmost)+(TopDie_topmost-TopDie_bottommost)+(BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
+    }
+    else if(TopDie_rightmost == INT32_MAX) SingleNet_cost += (BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
+    else SingleNet_cost += (TopDie_rightmost-TopDie_leftmost)+(TopDie_topmost-TopDie_bottommost);
+
+    nets[netname]->cost = SingleNet_cost;
+}
+
+long long int Neighborhood::total_final_cost(unordered_map<string, instance>& instances, unordered_map<string, net*> nets){
+    long long int total_cost = 0;
+    for(int i=0; i<nets.size(); i++){
+        single_net_final_cost(instances, nets, "N"+to_string(i+1));
+        total_cost += nets["N"+to_string(i+1)]->cost;
+    }
+    return total_cost;
+}

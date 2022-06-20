@@ -1,7 +1,7 @@
 #include "Annealing.h"
 
 float control_alpha(int later_cost, int ori_cost){
-    if(ori_cost - later_cost > 10000){
+    if(ori_cost - later_cost > 30000){
         return 0.95;
     }
     else
@@ -11,8 +11,8 @@ float control_alpha(int later_cost, int ori_cost){
 }
 
 void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_map<string,net*>& nets, fstream& fout){
-    float T = 2000; //need to test
-    float frozen_T = 0.5; //need to test
+    float T = 100;//2000; //need to test
+    float frozen_T = 10;//0.5; //need to test
     int innerloop = 200; //need to test
     float alpha; // 0 < alpha < 1
     int num_nei = 3; //number of neighberhood structure
@@ -82,6 +82,18 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
                         break;
                     case 3:
                         nei.update_swap(toptop2, botbot2, int1, int3, int5, int7);
+                        for(auto& it : instances[('C' + to_string(toptop2[int1][int3]))].connected_nets){
+                            cout << it->Net_name << endl;
+                            it->dist.first -= 1;
+                            it->dist.second += 1;
+                            cout << "dist.first: " << it->dist.first << endl;
+                            cout << nets[it->Net_name]->dist.first << endl;
+                        }
+                        for(auto& it : instances[('C' + to_string(botbot2[int5][int7]))].connected_nets){
+                            it->dist.first += 1;
+                            it->dist.second -= 1;
+                            cout << "dist: " << it->dist.first << endl;
+                        }
                         break;
                     // case 4:
                     //     nei.update_swap(botbot2, toptop2, int5, int7, int1, int3);

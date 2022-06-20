@@ -10,6 +10,7 @@ using namespace std;
 
 vector<vector<int>> toptop2;
 vector<vector<int>> botbot2;
+unordered_map<string, net*> nets;
 unordered_map<string, instance> instances;
 vector<tech> tech_stack; //tech_stack[0] is TA; tech_stack[1] is TB if it exists.
 unsigned long long int die_area;
@@ -76,7 +77,6 @@ int main(int argc, char* argv[]){
     fin >> trash >> terminal_spacing;
     fin >> trash >> Num_instance;
     
-    unordered_map<string, net*> nets;
     instances.reserve(Num_instance);
     vector<cell_node>* nodes = new vector<cell_node>; 
     nodes->reserve(Num_instance);
@@ -147,7 +147,6 @@ int main(int argc, char* argv[]){
 
     // cost test
     Neighborhood nei;
-
     Kraftwerk2 k1(Num_instance,instances);
     //k1.print_solution();
     k1.get_solution(instances);    
@@ -158,7 +157,7 @@ int main(int argc, char* argv[]){
     //k1.print_mat();
     //k1.calc_gradient(instances);
     //k1.update_pos_diff();
-    
+/*
     for(auto it = instances.begin(); it != instances.end(); ++it){
         fout << it->first << " ";
         if(it->second.part == PART::TOP){
@@ -178,7 +177,7 @@ int main(int argc, char* argv[]){
         fout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
         fout << endl;
     }
-    
+
     for(int i = 0; i < Num_instance; i++){
         fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
     }
@@ -187,13 +186,31 @@ int main(int argc, char* argv[]){
         fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
     }
     fout << endl;
+*/
     k1.Kraftwerk2_global_placement(instances,fout);
+
     //k1.print_solution();
     //k.get_solution(instances);
-    k1.print_solution(fout);
+    //k1.print_solution(fout);
+
     // cost test
+/*
+    Terminal_Placment t1(terminal_size_x,terminal_size_y,terminal_spacing);
+    t1.Thorolfsson_via_assignment(instances,nets);
+    for(int i = 0; i < Num_net; i++){
+        if(nets["N"+to_string(i+1)]->terminal_pos.x != 0)
+            fout << nets["N"+to_string(i+1)]->terminal_pos.x << " ";
+    }
+    fout << endl;
+    for(int i = 0; i < Num_net; i++){
+        if(nets["N"+to_string(i+1)]->terminal_pos.y != 0)
+            fout << nets["N"+to_string(i+1)]->terminal_pos.y << " ";
+    }
+    fout << endl;
+
     nei.place_instance_to_each_row(instances, toptop2, botbot2);
     nei.sort_row(toptop2, botbot2);
+    
     long long int temp = nei.calc_cost(instances ,nets);
     stretch(toptop2,botbot2);
     long long int temp5 = nei.calc_cost(instances ,nets);
@@ -218,13 +235,49 @@ int main(int argc, char* argv[]){
     annealing(nei, instances, nets, fout);
     long long int temp6 = nei.calc_cost(instances ,nets);
     cout << "after annealing: " << temp6 << endl;
+    
     stretch(toptop2,botbot2);
     long long int temp7 = nei.calc_cost(instances ,nets);
     cout << "final legal cost: " << temp7 << endl; 
 
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
+    }
+    fout << endl;
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
+    }
+    fout << endl;
     //Terminal placement
     Terminal_Placment t(terminal_size_x,terminal_size_y,terminal_spacing);
     t.Thorolfsson_via_assignment(instances,nets);
+    for(int i = 0; i < Num_net; i++){
+        if(nets["N"+to_string(i+1)]->terminal_pos.x != 0)
+            fout << nets["N"+to_string(i+1)]->terminal_pos.x << " ";
+    }
+    fout << endl;
+    for(int i = 0; i < Num_net; i++){
+        if(nets["N"+to_string(i+1)]->terminal_pos.y != 0)
+            fout << nets["N"+to_string(i+1)]->terminal_pos.y << " ";
+    }
+    fout << endl;
+    cout << "final: " << nei.total_final_cost(instances,nets) << endl;
+    int temp0 = 0;
+    int temp8 = 0;
+    for(int i = 0; i < Num_net; i++){
+        if(nets["N"+to_string(i+1)]->is_cut())
+            temp0++;
+    }
+    for(int i = 0; i < t.data.size(); i++){
+        for(int j = 0; j < t.data[i].size(); j++){
+            if(t.data[i][j] != 0)
+                temp8++;
+        }
+    }
+    cout << temp0 << endl;
+    cout << temp8 << endl;
+*/
+
     delete[] Net;
     fin.close();
     fout.close();

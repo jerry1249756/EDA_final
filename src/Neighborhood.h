@@ -42,6 +42,9 @@ class Neighborhood{
         // void update_move_between_row(vector<vector<int>>&, int, int, int);
         // void update_two_die_move(vector<vector<int>>&, vector<vector<int>>&, int, int);
         int swap_penalty(vector<vector<int>>&, vector<vector<int>>&, int, int, int, int);
+        void single_net_final_cost(unordered_map<string, instance>&, unordered_map<string, net*>&, string);
+        long long int total_final_cost(unordered_map<string, instance>&, unordered_map<string, net*>);
+    
     private:
         int toptech;
         int bottomtech;

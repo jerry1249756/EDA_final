@@ -517,12 +517,14 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
 void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fout){ 
     for(int j=0; j<D.capacity(); j++){
         for(int k=0; k<D[j].capacity(); k++){
-            D[j][k] = 0;
-            phi[j][k] = 0;
+            D_top[j][k] = 0;
+            D_bottom[j][k] = 0;
+            phi_top[j][k] = 0;
+            phi_bottom[j][k] = 0;
         }
     }
-    cal_D(map, D);
-    cal_phi(D, phi, 10);
+    cal_D(map, D_top, D_bottom);
+    cal_phi(D_top, phi_top, D_bottom, phi_bottom, 10);
     /*
     for(int j=0; j<D.capacity(); j++){
         for(int k=0; k<D[j].capacity(); k++){
@@ -554,9 +556,10 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
             height = tech_stack[1].libcells[it.second.libcell_type].height;
         }
 
-        
-        pair<float,float> p = single_point_gradient(phi,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
-        
+        if(it.second.part == PART::TOP)
+            pair<float,float> p = single_point_gradient(phi_top,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
+        else
+            pair<float,float> p = single_point_gradient(phi_bottom,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
         demand_x->data[n] = p.first;
         demand_y->data[n] = p.second;
         move_force_mat_x->data[n][n] = p.first;

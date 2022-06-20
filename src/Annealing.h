@@ -7,6 +7,7 @@
 #include <cmath>
 #include <random>
 #include <fstream>
+#include <string>
 using namespace std;
 
 float control_alpha(int,int);
