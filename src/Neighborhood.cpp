@@ -78,13 +78,13 @@ void Neighborhood::single_net_cost(unordered_map<string, instance>& instances, u
             if(pin_pos.y+ins_pos.y < BottomDie_bottommost) BottomDie_bottommost = pin_pos.y+ins_pos.y;
         }
     }
-    if(TopDie_rightmost != INT32_MAX && BottomDie_rightmost != INT32_MAX){
+    if(TopDie_rightmost != INT32_MIN && BottomDie_rightmost != INT32_MIN){
         SingleNet_cost += (TopDie_rightmost-TopDie_leftmost)+(TopDie_topmost-TopDie_bottommost)+(BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
     }
-    else if(TopDie_rightmost == INT32_MAX) SingleNet_cost += (BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
+    else if(TopDie_rightmost == INT32_MIN) SingleNet_cost += (BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
     else SingleNet_cost += (TopDie_rightmost-TopDie_leftmost)+(TopDie_topmost-TopDie_bottommost);
 
-    if(TopDie_rightmost != INT32_MAX && BottomDie_rightmost != INT32_MAX){
+    if(TopDie_rightmost != INT32_MIN && BottomDie_rightmost != INT32_MIN){
         if(TopDie_rightmost<BottomDie_leftmost) SingleNet_cost += BottomDie_leftmost-TopDie_rightmost;
         if(TopDie_leftmost>BottomDie_rightmost) SingleNet_cost += TopDie_leftmost-BottomDie_rightmost;
         if(TopDie_topmost<BottomDie_bottommost) SingleNet_cost += BottomDie_bottommost-TopDie_topmost;
@@ -364,7 +364,19 @@ int Neighborhood::two_die_swap_cost(unordered_map<string, instance>& ins, unorde
 //     return cost;
 // } 
 
-void Neighborhood::update_swap(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
+void Neighborhood::update_swap(vector<vector<int>>& die_row, int from_row, int from_col, int to_row, int to_col){
+    swap_instance(die_row[from_row][from_col], die_row[to_row][to_col]);
+    if(from_row != to_row){
+        die_row[from_row].push_back(die_row[to_row][to_col]);
+        die_row[to_row].push_back(die_row[from_row][from_col]);
+        die_row[from_row].erase(die_row[from_row].begin()+from_col);
+        die_row[to_row].erase(die_row[to_row].begin()+to_col);
+    }
+    sort_single_row(die_row, from_row);
+    sort_single_row(die_row, to_row);
+}
+
+void Neighborhood::update_two_die_swap(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
     two_die_swap_instance(from_die_row[from_row][from_col], to_die_row[to_row][to_col]);
     from_die_row[from_row].push_back(to_die_row[to_row][to_col]);
     to_die_row[to_row].push_back(from_die_row[from_row][from_col]);
@@ -417,7 +429,7 @@ void Neighborhood::update_swap(vector<vector<int>>& from_die_row, vector<vector<
 //     from_die_row[from_row].erase(from_die_row[from_row].begin()+from_col);
 //     sort(from_die_row, from_row);
 // }
-
+/*
 int Neighborhood::swap_penalty(vector<vector<int>>& from_die_row, vector<vector<int>>& to_die_row, int from_row, int from_col, int to_row, int to_col){
     int before = single_row_penalty(from_die_row, from_row) + single_row_penalty(to_die_row, to_row);
     update_swap(from_die_row, to_die_row, from_row, from_col, to_row, to_col);
@@ -425,6 +437,7 @@ int Neighborhood::swap_penalty(vector<vector<int>>& from_die_row, vector<vector<
     update_swap(from_die_row, to_die_row, from_row, from_col, to_row, to_col);
     return after - before;
 }
+*/
 
 void Neighborhood::single_net_final_cost(unordered_map<string, instance>& instances, unordered_map<string, net*>& nets, string netname){
     int SingleNet_cost = 0;
@@ -465,10 +478,10 @@ void Neighborhood::single_net_final_cost(unordered_map<string, instance>& instan
         if(nets[netname]->terminal_pos.y < BottomDie_bottommost) BottomDie_bottommost = nets[netname]->terminal_pos.y;
     }
 
-    if(TopDie_rightmost != INT32_MAX && BottomDie_rightmost != INT32_MAX){
+    if(TopDie_rightmost != INT32_MIN && BottomDie_rightmost != INT32_MIN){
         SingleNet_cost += (TopDie_rightmost-TopDie_leftmost)+(TopDie_topmost-TopDie_bottommost)+(BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
     }
-    else if(TopDie_rightmost == INT32_MAX) SingleNet_cost += (BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
+    else if(TopDie_rightmost == INT32_MIN) SingleNet_cost += (BottomDie_rightmost-BottomDie_leftmost)+(BottomDie_topmost-BottomDie_bottommost);
     else SingleNet_cost += (TopDie_rightmost-TopDie_leftmost)+(TopDie_topmost-TopDie_bottommost);
 
     nets[netname]->cost = SingleNet_cost;

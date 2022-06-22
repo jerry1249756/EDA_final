@@ -46,9 +46,18 @@ point Terminal_Placment::find_pos(unordered_map<string, instance>& instances, un
     int BottomDie_topmost = INT32_MIN;
     int BottomDie_bottommost = INT32_MAX;
     int netsize = nets[netname]->net_pin.size();
-    cout << "abc: " << nets[netname]->is_cut() << endl;
+    // cout << "abc: " << nets[netname]->is_cut() << endl;
+    cout << netname << ": ";
+    cout << "dist: " << nets[netname]->dist.first << " " <<  nets[netname]->dist.second << endl;
+    for(auto& it : nets[netname]->net_pin){
+        if(instances[it.first].part == PART::TOP)
+            cout << it.first << "'s part: Top" << endl;
+        else
+            cout << it.first << "'s part: Bottom" << endl;
+    }
+
     for(int i=0; i<netsize; i++){
-        point ins_pos = instances[nets[netname]->net_pin[i].INSTANCE].instance_pos;
+                point ins_pos = instances[nets[netname]->net_pin[i].INSTANCE].instance_pos;
         if(instances[nets[netname]->net_pin[i].INSTANCE].part == PART::TOP){  // this instance belongs to TOP
             point pin_pos = tech_stack[toptech].libcells[instances[nets[netname]->net_pin[i].INSTANCE].libcell_type].pins[nets[netname]->net_pin[i].PIN].pin_pos;
             if(pin_pos.x+ins_pos.x > TopDie_rightmost) TopDie_rightmost = pin_pos.x+ins_pos.x;
@@ -88,7 +97,6 @@ point Terminal_Placment::find_pos(unordered_map<string, instance>& instances, un
         else if(TopDie_rightmost <= BottomDie_leftmost){
             x = (TopDie_rightmost + BottomDie_leftmost) / 2;
         }
-
     }
     else if(TopDie_bottommost <= BottomDie_topmost && TopDie_bottommost >= BottomDie_bottommost && TopDie_topmost >= BottomDie_topmost){
         y = (TopDie_bottommost + BottomDie_topmost) / 2;
@@ -222,7 +230,7 @@ point Terminal_Placment::find_pos(unordered_map<string, instance>& instances, un
 }
 
 point Terminal_Placment::lee_algorithm(int i, int j){ //find the closest point whose value is 0 from the point i,j
-    cout << "original i j: " << i << " " << j << endl;
+    // cout << "original i j: " << i << " " << j << endl;
     queue<point> Q;
     Q.push(point(i,j));
     vector<vector<int>> temp;
@@ -269,6 +277,7 @@ void Terminal_Placment::Thorolfsson_via_assignment(unordered_map<string, instanc
                 it.second->terminal_pos = real_pos;
             }else{ //there is a terminal, find a closest place to put
                 point q = lee_algorithm(p.x, p.y);
+                cout << "q.x: " << q.x << " q.y: " << q.y << endl;
                 data[q.x][q.y]=1;
                 point real_pos = transform_from_grid_to_pos(q.x,q.y);
                 it.second->terminal_pos = real_pos;

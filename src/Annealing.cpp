@@ -11,8 +11,8 @@ float control_alpha(int later_cost, int ori_cost){
 }
 
 void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_map<string,net*>& nets, fstream& fout){
-    float T = 100;//2000; //need to test
-    float frozen_T = 10;//0.5; //need to test
+    float T = 2000; //need to test
+    float frozen_T = 0.5; //need to test
     int innerloop = 200; //need to test
     float alpha; // 0 < alpha < 1
     int num_nei = 3; //number of neighberhood structure
@@ -75,13 +75,12 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
                     default:
                         break;
                     case 1:
-                        nei.update_swap(toptop2, toptop2, int1, int3, int2, int4);
+                        nei.update_swap(toptop2, int1, int3, int2, int4);
                         break;
                     case 2:
-                        nei.update_swap(botbot2, botbot2, int5, int7, int6, int8);
+                        nei.update_swap(botbot2, int5, int7, int6, int8);
                         break;
                     case 3:
-                        nei.update_swap(toptop2, botbot2, int1, int3, int5, int7);
                         for(auto& it : instances[('C' + to_string(toptop2[int1][int3]))].connected_nets){
                             cout << it->Net_name << endl;
                             it->dist.first -= 1;
@@ -94,6 +93,7 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
                             it->dist.second -= 1;
                             cout << "dist: " << it->dist.first << endl;
                         }
+                        nei.update_two_die_swap(toptop2, botbot2, int1, int3, int5, int7);
                         break;
                     // case 4:
                     //     nei.update_swap(botbot2, toptop2, int5, int7, int1, int3);

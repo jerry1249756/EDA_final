@@ -23,6 +23,7 @@ int bottom_row_height;
 unsigned long long int TOP_area=0, BOTTOM_area=0;
 int top_die_upper_y, bottom_die_upper_y;
 
+
 int main(int argc, char* argv[]){
     //read file
     fstream fin(argv[1]);
@@ -138,6 +139,7 @@ int main(int argc, char* argv[]){
         nets[(*it)->net_name]->dist.first = (*it)->Dist.first;
         nets[(*it)->net_name]->dist.second = (*it)->Dist.second;
     }
+    
 
     delete[] temp_partition;
     delete nodes;
@@ -157,7 +159,7 @@ int main(int argc, char* argv[]){
     //k1.print_mat();
     //k1.calc_gradient(instances);
     //k1.update_pos_diff();
-/*
+
     for(auto it = instances.begin(); it != instances.end(); ++it){
         fout << it->first << " ";
         if(it->second.part == PART::TOP){
@@ -186,15 +188,25 @@ int main(int argc, char* argv[]){
         fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
     }
     fout << endl;
-*/
-    k1.Kraftwerk2_global_placement(instances,fout);
 
+    k1.Kraftwerk2_global_placement(instances,fout);
+/*
+    for(auto& it : nets){
+        cout << "dist: " << it.second->dist.first << " " <<  it.second->dist.second << endl;
+        for(auto& it2 : it.second->net_pin){
+            if(instances[it2.first].part == PART::TOP)
+                cout << it2.first << "'s part: Top" << endl;
+            else
+                cout << it2.first << "'s part: Bottom" << endl;
+        }
+    }
+*/
     //k1.print_solution();
     //k.get_solution(instances);
-    //k1.print_solution(fout);
+    k1.print_solution(fout);
 
     // cost test
-/*
+
     Terminal_Placment t1(terminal_size_x,terminal_size_y,terminal_spacing);
     t1.Thorolfsson_via_assignment(instances,nets);
     for(int i = 0; i < Num_net; i++){
@@ -276,7 +288,7 @@ int main(int argc, char* argv[]){
     }
     cout << temp0 << endl;
     cout << temp8 << endl;
-*/
+
 
     delete[] Net;
     fin.close();

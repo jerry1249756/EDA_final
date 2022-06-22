@@ -8,6 +8,7 @@ Kraftwerk2::Kraftwerk2(int n, unordered_map<string, instance>& map){ //n: num in
     demand_y = new Vector(n);
     solution_x = new Vector(n);
     solution_y = new Vector(n);
+    w_i.resize(n);
     //initial the D and phi array
     int die_width = die_upper_x - die_lower_x;
         D_top.resize(die_width/min(top_row_height,bottom_row_height));
@@ -28,18 +29,22 @@ Kraftwerk2::Kraftwerk2(int n, unordered_map<string, instance>& map){ //n: num in
         if(it.second.tech == TECH::TECH_A){
             acceptable_x_max = die_upper_x - tech_stack[0].libcells[it.second.libcell_type].width;
             if(it.second.part == PART::TOP){
+                w_i[n] = static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
                 acceptable_y_max = top_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
             }
             else{
+                w_i[n] = static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
                 acceptable_y_max = bottom_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
             }
             
         }else if(it.second.tech == TECH::TECH_B){
             acceptable_x_max = die_upper_x - tech_stack[1].libcells[it.second.libcell_type].width;
             if(it.second.part == PART::TOP){
+                w_i[n] = static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
                 acceptable_y_max = top_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
             }
             else{
+                w_i[n] = static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
                 acceptable_y_max = bottom_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
             }
         }
@@ -386,8 +391,10 @@ void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
             for(int j=i+1; j<n; j++){
                 int k = parse_inst_name(it.second->net_pin[i].INSTANCE);
                 int l = parse_inst_name(it.second->net_pin[j].INSTANCE);
-                connectivity_mat->data[k][l] += temp;
-                connectivity_mat->data[l][k] += temp;
+                connectivity_mat->data[k][l] -= temp;
+                connectivity_mat->data[l][k] -= temp;
+                connectivity_mat->data[k][k] += temp;
+                connectivity_mat->data[l][l] += temp;
             }
         }
     }
@@ -416,7 +423,7 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
     int j = static_cast<int>(y/delta-0.5);
     float slope = 1;
     //cout << i << " " << j << endl;
-    float val, grad_x, grad_y;
+    float val=0, grad_x, grad_y;
     int temp_upper_y = 0;
     if(part == PART::TOP){
         temp_upper_y = top_die_upper_y + die_lower_y;
@@ -424,97 +431,158 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
     else{
         temp_upper_y = bottom_die_upper_y + die_lower_y;
     }
-    if(i >= (die_upper_x-die_lower_x)/delta-1 || i<=0 || j >= (temp_upper_y-die_lower_y)/delta-1 || j<=0){
-        if(i >= (die_upper_x-die_lower_x)/delta-1){ //right border
-            if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
-                grad_x = slope;
-                grad_y = slope;
-            }else if(j<=0){
-                grad_x = slope;
-                grad_y = -1*slope;
-            }else{
-                grad_x = slope;
-                float w1 = y - delta*(j+0.5);
-                float w2 = delta*(j+1.5) - y;
-                i = (die_upper_x-die_lower_x)/delta-1;
-                val = (w1*phi[i][j+1] + w2*phi[i][j])/delta;
-                int l = (y/delta-j >= 0.5) ? j+1 : j;
-                if(l==j){
-                    grad_y = (val - phi[i][l])/(w1*delta);
-                }else{
-                    grad_y = (phi[i][l] - val)/(w2*delta);
-                }
-            }
-        }else if(i<=0){ //left border
-            if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
-                grad_x = -1*slope;
-                grad_y = slope;
-            }else if(j<=0){
-                grad_x = -1*slope;
-                grad_y = -1*slope;
-            }else{
-                grad_x = -1*slope;
-                float w1 = y - delta*(j+0.5);
-                float w2 = delta*(j+1.5) - y;
-                i = 0;
-                val = (w1*phi[i][j+1] + w2*phi[i][j])/delta;
-                int l = (y/delta-j >= 0.5) ? j+1 : j;
-                if(l==j){
-                    grad_y = (val - phi[i][l])/(w1*delta);
-                }else{
-                    grad_y = (phi[i][l] - val)/(w2*delta);
-                }
-            }
-        }else if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border mid
-            grad_y = slope;
-            float l1 = x - delta*(i+0.5);
-            float l2 = delta*(i+1.5) - x;
-            int k = (x/delta-i >= 0.5) ? i+1 : i;
-            j = (temp_upper_y-die_lower_y)/delta-1;
-            if(k==i){
-                grad_x = (val - phi[k][j])/(delta*l1);
-            }else{
-                grad_x = (phi[k][j] - val)/(delta*l2);
-            }
-        }else if(j<=0){
-            grad_y = -1*slope;
-            float l1 = x - delta*(i+0.5);
-            float l2 = delta*(i+1.5) - x;
-            int k = (x/delta-i >= 0.5) ? i+1 : i;
-            j = 0;
-            if(k==i){
-                grad_x = (val - phi[k][j])/(delta*l1);
-            }else{
-                grad_x = (phi[k][j] - val)/(delta*l2);
-            }
+    // if(i >= (die_upper_x-die_lower_x)/delta-1 || i<=0 || j >= (temp_upper_y-die_lower_y)/delta-1 || j<=0){
+    //     if(i >= (die_upper_x-die_lower_x)/delta-1){ //right border
+    //         if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
+    //             grad_x = slope;
+    //             grad_y = slope;
+    //         }else if(j<=0){
+    //             grad_x = slope;
+    //             grad_y = -1*slope;
+    //         }else{
+    //             grad_x = slope;
+    //             float w1 = y - delta*(j+0.5);
+    //             float w2 = delta*(j+1.5) - y;
+    //             i = (die_upper_x-die_lower_x)/delta-1;
+    //             val = (w1*phi[i][j+1] + w2*phi[i][j])/delta;
+    //             int l = (y/delta-j >= 0.5) ? j+1 : j;
+    //             if(l==j){
+    //                 grad_y = (val - phi[i][l])/(w1*delta);
+    //             }else{
+    //                 grad_y = (phi[i][l] - val)/(w2*delta);
+    //             }
+    //         }
+    //     }else if(i<=0){ //left border
+    //         if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
+    //             grad_x = -1*slope;
+    //             grad_y = slope;
+    //         }else if(j<=0){
+    //             grad_x = -1*slope;
+    //             grad_y = -1*slope;
+    //         }else{
+    //             grad_x = -1*slope;
+    //             float w1 = y - delta*(j+0.5);
+    //             float w2 = delta*(j+1.5) - y;
+    //             i = 0;
+    //             val = (w1*phi[i][j+1] + w2*phi[i][j])/delta;
+    //             int l = (y/delta-j >= 0.5) ? j+1 : j;
+    //             if(l==j){
+    //                 grad_y = (val - phi[i][l])/(w1*delta);
+    //             }else{
+    //                 grad_y = (phi[i][l] - val)/(w2*delta);
+    //             }
+    //         }
+    //     }else if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border mid
+    //         grad_y = slope;
+    //         float l1 = x - delta*(i+0.5);
+    //         float l2 = delta*(i+1.5) - x;
+    //         int k = (x/delta-i >= 0.5) ? i+1 : i;
+    //         j = (temp_upper_y-die_lower_y)/delta-1;
+    //         if(k==i){
+    //             grad_x = (val - phi[k][j])/(delta*l1);
+    //         }else{
+    //             grad_x = (phi[k][j] - val)/(delta*l2);
+    //         }
+    //     }else if(j<=0){
+    //         grad_y = -1*slope;
+    //         float l1 = x - delta*(i+0.5);
+    //         float l2 = delta*(i+1.5) - x;
+    //         int k = (x/delta-i >= 0.5) ? i+1 : i;
+    //         j = 0;
+    //         if(k==i){
+    //             grad_x = (val - phi[k][j])/(delta*l1);
+    //         }else{
+    //             grad_x = (phi[k][j] - val)/(delta*l2);
+    //         }
+    //     }
+    // }else{ //center
+    //     int k = (x/delta-i >= 0.5) ? i+1 : i; //closest point
+    //     int l = (y/delta-j >= 0.5) ? j+1 : j;
+    //     float l1 = x - delta*(i+0.5);
+    //     float l2 = delta*(i+1.5) - x;
+    //     float w1 = y - delta*(j+0.5);
+    //     float w2 = delta*(j+1.5) - y;
+    //     val = (l2*w2*phi[i][j]+l1*w2*phi[i+1][j]+l2*w1*phi[i][j+1]+l1*w1*phi[i+1][j+1])/(delta*delta);
+    //     if(k==i){
+    //         if(l==j){
+    //             grad_x = (val - phi[k][l])/(delta*l1);
+    //             grad_y = (val - phi[k][l])/(delta*w1);
+    //         }else{
+    //             grad_x = (val - phi[k][l])/(delta*l1);
+    //             grad_y = (phi[k][l] - val)/(delta*w2);
+    //         }
+    //     }else{
+    //         if(l==j){
+    //             grad_x = (phi[k][l] - val)/(delta*l2);
+    //             grad_y = (val - phi[k][l])/(delta*w1);
+    //         }else{
+    //             grad_x = (phi[k][l] - val)/(delta*l2);
+    //             grad_y = (phi[k][l] - val)/(delta*w2);
+    //         }
+    //     }
+    // }
+    
+    int k = (x/delta-i >= 0.5) ? i+1 : i; //closest point
+    int l = (y/delta-j >= 0.5) ? j+1 : j;
+    float l1 = x - delta*(i+0.5);
+    float l2 = delta*(i+1.5) - x;
+    float w1 = y - delta*(j+0.5);
+    float w2 = delta*(j+1.5) - y;
+    if(i+1<phi.size()){
+        if(j+1<phi[0].size()){
+            val += l1*w1*phi[i+1][j+1];
         }
-    }else{ //center
-        int k = (x/delta-i >= 0.5) ? i+1 : i; //closest point
-        int l = (y/delta-j >= 0.5) ? j+1 : j;
-        float l1 = x - delta*(i+0.5);
-        float l2 = delta*(i+1.5) - x;
-        float w1 = y - delta*(j+0.5);
-        float w2 = delta*(j+1.5) - y;
-        val = (l2*w2*phi[i][j]+l1*w2*phi[i+1][j]+l2*w1*phi[i][j+1]+l1*w1*phi[i+1][j+1])/(delta*delta);
-        if(k==i){
-            if(l==j){
-                grad_x = (val - phi[k][l])/(delta*l1);
-                grad_y = (val - phi[k][l])/(delta*w1);
-            }else{
-                grad_x = (val - phi[k][l])/(delta*l1);
-                grad_y = (phi[k][l] - val)/(delta*w2);
-            }
-        }else{
-            if(l==j){
-                grad_x = (phi[k][l] - val)/(delta*l2);
-                grad_y = (val - phi[k][l])/(delta*w1);
-            }else{
-                grad_x = (phi[k][l] - val)/(delta*l2);
-                grad_y = (phi[k][l] - val)/(delta*w2);
-            }
+        if(j<phi[0].size()){
+            val += l1*w2*phi[i+1][j];
         }
     }
-    
+    if(i< phi.size()){
+        if(j+1<phi[0].size()){
+            val += l2*w1*phi[i][j+1];
+        }
+        if(j<phi[0].size()){
+            val += l2*w2*phi[i][j];
+        }
+    }
+    val/=(delta*delta);
+
+    if(k==i){
+        if(l==j){
+            if(k>=phi.size() || l>phi[0].size()){
+                grad_x = val/(delta*l1);
+                grad_y = val/(delta*w1);
+            }else{
+                grad_x = (val - phi[k][l])/(delta*l1);
+                grad_y = (val - phi[k][l])/(delta*w1);
+            }
+        }else{
+            if(k>=phi.size() || l>phi[0].size()){
+                grad_x = val/(delta*l1);
+                grad_y =  -val/(delta*w2);
+            }else{
+                grad_x = (val - phi[k][l])/(delta*l1);
+                grad_y = (phi[k][l] - val)/(delta*w2);
+            }
+        }
+    }else{
+        if(l==j){
+            if(k>=phi.size() || l>phi[0].size()){
+                grad_x = -val/(delta*l2);
+                grad_y = val/(delta*w1);
+            }else{
+                grad_x = (phi[k][l] - val)/(delta*l2);
+                grad_y = (val - phi[k][l])/(delta*w1);
+            }
+        }else{
+            if(k>=phi.size() || l>phi[0].size()){
+                grad_x =  - val/(delta*l2);
+                grad_y =  - val/(delta*w2);
+            }else{
+                grad_x = (phi[k][l] - val)/(delta*l2);
+                grad_y = (phi[k][l] - val)/(delta*w2);
+            }   
+        }
+    }
     return make_pair(grad_x, grad_y);
 }
 // calculate the C^O matrix, which is the gradient of the specified points, val stored on diagonal entries. 
@@ -563,6 +631,11 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
             width = tech_stack[1].libcells[it.second.libcell_type].width;
             height = tech_stack[1].libcells[it.second.libcell_type].height;
         }
+        
+        
+        
+        
+
         pair<float,float> p;
         if(it.second.part == PART::TOP)
             p = single_point_gradient(phi_top,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
@@ -570,8 +643,8 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
             p = single_point_gradient(phi_bottom,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
         demand_x->data[n] = p.first;
         demand_y->data[n] = p.second;
-        move_force_mat_x->data[n][n] = p.first;
-        move_force_mat_y->data[n][n] = p.second;
+        move_force_mat_x->data[n][n] = w_i[n];
+        move_force_mat_y->data[n][n] = w_i[n];
 /*
         fout << it.second.instance_pos.x << " " << it.second.instance_pos.y << " ";
         fout << move_force_mat_x->data[n][n] << " " << move_force_mat_y->data[n][n] << endl;
@@ -581,7 +654,7 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
 
 }
 
-void Kraftwerk2::update_pos_diff(int phase, fstream fout){
+void Kraftwerk2::update_pos_diff(int phase, fstream& fout){
     //Cholesky
     // Matrix C_x(size), C_y(size), LT_x(size), L_x(size), L_y(size), LT_y(size);
     //PLU
@@ -601,11 +674,14 @@ void Kraftwerk2::update_pos_diff(int phase, fstream fout){
     Matrix_Addition(temp, *move_force_mat_y, C_y);
     // C_x.Cholesky_decomposition(L_x,LT_x);
     // C_y.Cholesky_decomposition(L_y,LT_y);
+/*
     for(int i = 0; i < size; i++){
         for(int j = 0; j < size; j++){
-            fout << C_x.data[i][j];
+            fout << C_x.data[i][j] << " ";
         }
     }
+    fout << endl;
+*/
     C_x.PLU_decomposition(L_x, U_x, P_x);
     C_y.PLU_decomposition(L_y, U_y, P_y);
     /*
@@ -618,11 +694,12 @@ void Kraftwerk2::update_pos_diff(int phase, fstream fout){
     Vector delta_x(size), delta_y(size);
     Matrix_Vector_Prod(*move_force_mat_x, *demand_x, b_x);
     Matrix_Vector_Prod(*move_force_mat_y, *demand_y, b_y);
+/*
     for(int i = 0; i < size; i++){
-        for(int j = 0; j < size; j++){
-            fout << b_x.data[i][j];
-        }
+        fout << b_x.data[i] << " ";
     }
+    fout << endl;
+*/
     //move_force_mat_x->print_data();
     // for(int i = 0; i < size; i++){
     //     cout << demand_x->data[i] << " ";

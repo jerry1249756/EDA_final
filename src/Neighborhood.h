@@ -37,11 +37,12 @@ class Neighborhood{
         // int move_in_row_cost(unordered_map<string, instance>&, unordered_map<string, net*>&, vector<vector<int>>&, int, int, int);
         // int move_between_row_cost(unordered_map<string, instance>&, unordered_map<string, net*>&, vector<vector<int>>&, int, int, int);
         // int two_die_move_cost(unordered_map<string, instance>&, unordered_map<string, net*>&, vector<vector<int>>&, vector<vector<int>>&, int, int, int, int);
-        void update_swap(vector<vector<int>>&, vector<vector<int>>&, int, int, int, int);
+        void update_swap(vector<vector<int>>&, int, int, int, int);
+        void update_two_die_swap(vector<vector<int>>&, vector<vector<int>>&, int, int, int, int);
         // void update_move_in_row(vector<vector<int>>&, int, int, int);
         // void update_move_between_row(vector<vector<int>>&, int, int, int);
         // void update_two_die_move(vector<vector<int>>&, vector<vector<int>>&, int, int);
-        int swap_penalty(vector<vector<int>>&, vector<vector<int>>&, int, int, int, int);
+        // int swap_penalty(vector<vector<int>>&, vector<vector<int>>&, int, int, int, int);
         void single_net_final_cost(unordered_map<string, instance>&, unordered_map<string, net*>&, string);
         long long int total_final_cost(unordered_map<string, instance>&, unordered_map<string, net*>);
     
