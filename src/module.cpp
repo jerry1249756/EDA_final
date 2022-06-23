@@ -37,6 +37,52 @@ bool net::is_cut(){  //first: top, second: bottom
     else return true;
 }
 
+
+void net::update_bound(unordered_map<string,instance>& instances, vector<tech>& tech_stack){
+    int left = INT32_MAX;
+    int right = INT32_MIN;
+    int up = INT32_MIN;
+    int bottom = INT32_MAX;
+    for(int i = 0; i < net_pin.size(); i++){
+        if(instances[net_pin[i].first].tech == TECH::TECH_A){
+            if((instances[net_pin[i].first].instance_pos.x + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x) < left){
+                left = instances[net_pin[i].first].instance_pos.x + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x;
+                left_index = i;
+            }
+            if((instances[net_pin[i].first].instance_pos.x + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x) > right){
+                right = instances[net_pin[i].first].instance_pos.x + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x;
+                right_index = i;
+            }
+            if((instances[net_pin[i].first].instance_pos.y + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y) < bottom){
+                bottom = instances[net_pin[i].first].instance_pos.y + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y;
+                bottom_index = i;
+            }
+            if((instances[net_pin[i].first].instance_pos.y + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y) > up){
+                up = instances[net_pin[i].first].instance_pos.y + tech_stack[0].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y;
+                up_index = i;
+            }
+        }
+        else{
+            if((instances[net_pin[i].first].instance_pos.x + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x) < left){
+                left = instances[net_pin[i].first].instance_pos.x + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x;
+                left_index = i;
+            }
+            if((instances[net_pin[i].first].instance_pos.x + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x) > right){
+                right = instances[net_pin[i].first].instance_pos.x + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.x;
+                right_index = i;
+            }
+            if((instances[net_pin[i].first].instance_pos.y + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y) < bottom){
+                bottom = instances[net_pin[i].first].instance_pos.y + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y;
+                bottom_index = i;
+            }
+            if((instances[net_pin[i].first].instance_pos.y + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y) > up){
+                up = instances[net_pin[i].first].instance_pos.y + tech_stack[1].libcells[instances[net_pin[i].first].libcell_type].pins[net_pin[i].second].pin_pos.y;
+                up_index = i;
+            }
+        }
+    }
+}
+
 int manhat_dist(point a, point b){
     return abs(a.x-b.x)+abs(a.y-b.y);
 }

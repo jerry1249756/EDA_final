@@ -35,13 +35,13 @@ void cell_node::set_gain(){ //need debug!
     if(part==PART::TOP){//from = A, to = B
         //vector use iterator for performance
         for(vector<partition_net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
-            if((*it)->Dist.T==1) gain+=1; 
-            else if((*it)->Dist.B==0) gain-=1; 
+            if((*it)->Dist.first==1) gain+=1; 
+            else if((*it)->Dist.second==0) gain-=1; 
         }
     }else if(part==PART::BOTTOM){ //from = B, to = A
         for(vector<partition_net*>::iterator it=connected_nets.begin(); it!=connected_nets.end(); ++it){
-            if((*it)->Dist.B==1) gain+=1;
-            else if((*it)->Dist.T==0) gain-=1; 
+            if((*it)->Dist.second==1) gain+=1;
+            else if((*it)->Dist.first==0) gain-=1; 
         }
     }
     return;
@@ -78,37 +78,37 @@ void cell_node::update_area(){
 }
 
 partition_net::partition_net(){
-    Dist.T=0;
-    Dist.B=0;
+    Dist.first=0;
+    Dist.second=0;
 };
 
 partition_net::partition_net(string name){
     net_name = name ;
-    Dist.T=0;
-    Dist.B=0;
+    Dist.first=0;
+    Dist.second=0;
 };
 
 void partition_net::add_node(cell_node* c){
     connected_nodes.push_back(c);
     c->connected_nets.push_back(this);
-    if(c->part==PART::TOP) Dist.T+=1;
-    else if(c->part==PART::BOTTOM) Dist.B+=1;
+    if(c->part==PART::TOP) Dist.first+=1;
+    else if(c->part==PART::BOTTOM) Dist.second+=1;
 };
 
 bool partition_net::is_cut(){
-    if(Dist.T==0 || Dist.B==0) return false;
+    if(Dist.first==0 || Dist.second==0) return false;
     else return true;
 };
 
 bool partition_net::is_critical(){
-    if(Dist.T==(1 || 0)) return true; 
-    else if(Dist.B == (1 || 0))return true; 
+    if(Dist.first==(1 || 0)) return true; 
+    else if(Dist.second == (1 || 0))return true; 
     else return false;
 };
 
 void partition_net::show_data(){
     cout << "net name:    " << net_name << "\n";
-    cout << "Distribution:(" << Dist.T << " " << Dist.B << ")\n";
+    cout << "Distribution:(" << Dist.first << " " << Dist.second << ")\n";
     cout << "connected_nodes:";
     for(vector<cell_node*>::iterator it=connected_nodes.begin(); it!=connected_nodes.end(); ++it){
         cout << (*it)->node_name << " ";

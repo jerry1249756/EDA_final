@@ -11,6 +11,19 @@ float control_alpha(int later_cost, int ori_cost){
 }
 
 void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_map<string,net*>& nets, fstream& fout){
+    int toptech, bottomtech;
+    if(top_die_tech == "TA" && bottom_die_tech == "TB"){
+        toptech = 0;
+        bottomtech = 1;
+    }
+    else if(top_die_tech == "TB" && bottom_die_tech == "TA"){
+        toptech = 1;
+        bottomtech = 0;
+    }
+    else{
+        toptech = 0;
+        bottomtech = 0;
+    }
     float T = 2000; //need to test
     float frozen_T = 0.5; //need to test
     int innerloop = 200; //need to test
@@ -21,8 +34,8 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
         for(int i = 0; i < innerloop; i++){
             random_device rd;
             mt19937 gen(rd());
-            uniform_int_distribution<> distrib1(1,num_nei);
-            int temp = distrib1(gen);
+            uniform_int_distribution<> distrib1(3,7);
+            int temp = distrib1(gen)/3;
             uniform_int_distribution<> distrib2(0,toptop2.size()-1);
             int int1 = distrib2(gen);
             int int2 = distrib2(gen);
@@ -81,19 +94,19 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
                         nei.update_swap(botbot2, int5, int7, int6, int8);
                         break;
                     case 3:
-                        for(auto& it : instances[('C' + to_string(toptop2[int1][int3]))].connected_nets){
-                            cout << it->Net_name << endl;
-                            it->dist.first -= 1;
-                            it->dist.second += 1;
-                            cout << "dist.first: " << it->dist.first << endl;
-                            cout << nets[it->Net_name]->dist.first << endl;
-                        }
-                        for(auto& it : instances[('C' + to_string(botbot2[int5][int7]))].connected_nets){
-                            it->dist.first += 1;
-                            it->dist.second -= 1;
-                            cout << "dist: " << it->dist.first << endl;
-                        }
-                        nei.update_two_die_swap(toptop2, botbot2, int1, int3, int5, int7);
+                        if(TOP_area-tech_stack[toptech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*top_row_height+tech_stack[toptech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*top_row_height <= die_area/100*top_die_max_util && BOTTOM_area+tech_stack[bottomtech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*bottom_row_height-tech_stack[bottomtech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*bottom_row_height <= die_area/100*bottom_die_max_util){
+                            for(auto& it : instances[('C' + to_string(toptop2[int1][int3]))].connected_nets){
+                                it->dist.first -= 1;
+                                it->dist.second += 1;
+                            }
+                            for(auto& it : instances[('C' + to_string(botbot2[int5][int7]))].connected_nets){
+                                it->dist.first += 1;
+                                it->dist.second -= 1;
+                            }
+                            TOP_area = TOP_area-tech_stack[toptech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*top_row_height+tech_stack[toptech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*top_row_height;
+                            BOTTOM_area = BOTTOM_area+tech_stack[bottomtech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*bottom_row_height-tech_stack[bottomtech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*bottom_row_height;
+                            nei.update_two_die_swap(toptop2, botbot2, int1, int3, int5, int7);
+                        }  
                         break;
                     // case 4:
                     //     nei.update_swap(botbot2, toptop2, int5, int7, int1, int3);

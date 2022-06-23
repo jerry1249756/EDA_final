@@ -19,8 +19,8 @@ class net;
 
 class point{
     public:
-        int x;
-        int y;
+        float x;
+        float y;
         point(){ x=0; y=0; }
         point(int a, int b){ x=a; y=b; }
         point(const point& p1){ x = p1.x; y=p1.y; }
@@ -83,10 +83,15 @@ class net{
         string Net_name;
         vector<ip> net_pin;
         void add_ip(string, string, unordered_map<string, instance>&);
+        void update_bound(unordered_map<string,instance>&, vector<tech>&);
         int cost;
         distribution dist;
         bool is_cut();
         point terminal_pos = point(0,0);
+        int left_index;
+        int right_index;
+        int up_index;
+        int bottom_index;
 };
 
 int manhat_dist(point, point);

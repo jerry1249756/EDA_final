@@ -6,6 +6,8 @@
 #include <cmath>
 #include <vector>
 #include <queue>
+#include <string>
+#include <algorithm>
 #include <unordered_map>
 #include <iostream>
 
@@ -25,5 +27,7 @@ class Terminal_Placment{
         vector<vector<int>> data;
         int toptech, bottomtech;
 };
+
+bool net_compare(string, string);
 
 #endif

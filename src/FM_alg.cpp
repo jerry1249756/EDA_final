@@ -78,11 +78,11 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
     for(vector<partition_net*>::iterator it=(*c).connected_nets.begin(); it!=(*c).connected_nets.end(); ++it){
         int F_n=0, T_n=0;
         if (from == PART::TOP){
-            F_n = (*it)->Dist.T;
-            T_n = (*it)->Dist.B;
+            F_n = (*it)->Dist.first;
+            T_n = (*it)->Dist.second;
         }else{
-            F_n = (*it)->Dist.B;
-            T_n = (*it)->Dist.T;
+            F_n = (*it)->Dist.second;
+            T_n = (*it)->Dist.first;
         }
         if(T_n==0){
             //update for each other unlocked-cell in this net
@@ -103,11 +103,11 @@ void swap_and_recalculate(vector<cell_node>& v, cell_node* c){ //TODO
         F_n -= 1;
         T_n += 1;
         if (from == PART::TOP){
-            (*it)->Dist.T = F_n;
-            (*it)->Dist.B = T_n;
+            (*it)->Dist.first = F_n;
+            (*it)->Dist.second = T_n;
         }else{
-            (*it)->Dist.B = F_n;
-            (*it)->Dist.T = T_n;
+            (*it)->Dist.second = F_n;
+            (*it)->Dist.first = T_n;
         }
         if(F_n==0){
             for(vector<cell_node*>::iterator it2=(*it)->connected_nodes.begin(); it2!=(*it)->connected_nodes.end(); ++it2){

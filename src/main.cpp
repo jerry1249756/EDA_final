@@ -22,10 +22,13 @@ int top_row_height;
 int bottom_row_height;
 unsigned long long int TOP_area=0, BOTTOM_area=0;
 int top_die_upper_y, bottom_die_upper_y;
+int Num_instance;
 
 
 int main(int argc, char* argv[]){
     //read file
+
+
     fstream fin(argv[1]);
     fstream fout(argv[2]);
     
@@ -34,7 +37,7 @@ int main(int argc, char* argv[]){
     int top_start_x, top_start_y, top_row_length;  
     int bottom_start_x, bottom_start_y, bottom_row_length;  
     int terminal_size_x, terminal_size_y, terminal_spacing;
-    int Num_instance, Num_net, Num_net_pin;
+    int Num_net, Num_net_pin;
 
     fin >> trash >> NumTechnologies;
     tech_stack.reserve(NumTechnologies);
@@ -149,13 +152,13 @@ int main(int argc, char* argv[]){
 
     // cost test
     Neighborhood nei;
-    Kraftwerk2 k1(Num_instance,instances);
+    Kraftwerk2 k1(instances);
     //k1.print_solution();
     k1.get_solution(instances);    
     long long int temp3 = nei.calc_cost(instances ,nets);
     // long long int temp4 = nei.init_penalty(instances, toptop, botbot);
     k1.input_solution(instances);
-    k1.gen_connectivity_matrix(nets);
+    //k1.gen_connectivity_matrix(nets);
     //k1.print_mat();
     //k1.calc_gradient(instances);
     //k1.update_pos_diff();
@@ -179,7 +182,6 @@ int main(int argc, char* argv[]){
         fout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
         fout << endl;
     }
-
     for(int i = 0; i < Num_instance; i++){
         fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
     }
@@ -188,7 +190,6 @@ int main(int argc, char* argv[]){
         fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
     }
     fout << endl;
-
     k1.Kraftwerk2_global_placement(instances,fout);
 /*
     for(auto& it : nets){
@@ -203,10 +204,10 @@ int main(int argc, char* argv[]){
 */
     //k1.print_solution();
     //k.get_solution(instances);
-    k1.print_solution(fout);
+    // k1.print_solution(fout);
 
     // cost test
-
+/*
     Terminal_Placment t1(terminal_size_x,terminal_size_y,terminal_spacing);
     t1.Thorolfsson_via_assignment(instances,nets);
     for(int i = 0; i < Num_net; i++){
@@ -219,10 +220,19 @@ int main(int argc, char* argv[]){
             fout << nets["N"+to_string(i+1)]->terminal_pos.y << " ";
     }
     fout << endl;
+*/
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
+    }
+    fout << endl;
+    for(int i = 0; i < Num_instance; i++){
+        fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
+    }
+    fout << endl;
 
     nei.place_instance_to_each_row(instances, toptop2, botbot2);
     nei.sort_row(toptop2, botbot2);
-    
+
     long long int temp = nei.calc_cost(instances ,nets);
     stretch(toptop2,botbot2);
     long long int temp5 = nei.calc_cost(instances ,nets);
@@ -237,10 +247,9 @@ int main(int argc, char* argv[]){
     fout << endl;
     cout << endl; 
     // long long int temp2 = nei.init_penalty(instances, toptop2, botbot2);
-    cout << endl;
-    cout << "before cost: " << temp3 << endl;
-    cout << "after cost: " << temp << endl;
-    cout << "after legal cost: " << temp5 << endl;
+    cout << "before global cost: " << temp3 << endl;
+    cout << "after global cost: " << temp << endl;
+    cout << "after global legal cost: " << temp5 << endl;
     // cout << "before penalty: " << temp4 << endl;
     // cout << "after penalty: " << temp2 << endl;
 
@@ -250,7 +259,7 @@ int main(int argc, char* argv[]){
     
     stretch(toptop2,botbot2);
     long long int temp7 = nei.calc_cost(instances ,nets);
-    cout << "final legal cost: " << temp7 << endl; 
+    cout << "annealing legal cost: " << temp7 << endl; 
 
     for(int i = 0; i < Num_instance; i++){
         fout << instances["C"+to_string(i+1)].instance_pos.x << " ";

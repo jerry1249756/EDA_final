@@ -10,8 +10,6 @@
 using namespace std;
 
 typedef pair<int,int> distribution;
-#define T first 
-#define B second
 
 class partition_net; //forward declaration for two types pointer using together
 

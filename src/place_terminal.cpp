@@ -46,18 +46,8 @@ point Terminal_Placment::find_pos(unordered_map<string, instance>& instances, un
     int BottomDie_topmost = INT32_MIN;
     int BottomDie_bottommost = INT32_MAX;
     int netsize = nets[netname]->net_pin.size();
-    // cout << "abc: " << nets[netname]->is_cut() << endl;
-    cout << netname << ": ";
-    cout << "dist: " << nets[netname]->dist.first << " " <<  nets[netname]->dist.second << endl;
-    for(auto& it : nets[netname]->net_pin){
-        if(instances[it.first].part == PART::TOP)
-            cout << it.first << "'s part: Top" << endl;
-        else
-            cout << it.first << "'s part: Bottom" << endl;
-    }
-
     for(int i=0; i<netsize; i++){
-                point ins_pos = instances[nets[netname]->net_pin[i].INSTANCE].instance_pos;
+        point ins_pos = instances[nets[netname]->net_pin[i].INSTANCE].instance_pos;
         if(instances[nets[netname]->net_pin[i].INSTANCE].part == PART::TOP){  // this instance belongs to TOP
             point pin_pos = tech_stack[toptech].libcells[instances[nets[netname]->net_pin[i].INSTANCE].libcell_type].pins[nets[netname]->net_pin[i].PIN].pin_pos;
             if(pin_pos.x+ins_pos.x > TopDie_rightmost) TopDie_rightmost = pin_pos.x+ins_pos.x;
@@ -73,8 +63,6 @@ point Terminal_Placment::find_pos(unordered_map<string, instance>& instances, un
             if(pin_pos.y+ins_pos.y < BottomDie_bottommost) BottomDie_bottommost = pin_pos.y+ins_pos.y;
         }
     }
-    cout << TopDie_bottommost << " " << TopDie_topmost << " " << TopDie_leftmost << " " << TopDie_rightmost << endl;
-    cout << BottomDie_bottommost << " " << BottomDie_topmost << " " << BottomDie_leftmost << " " << BottomDie_rightmost << endl;
     //take center point and return the grid point
     int x, y;
     if(TopDie_bottommost >= BottomDie_topmost){
@@ -97,6 +85,7 @@ point Terminal_Placment::find_pos(unordered_map<string, instance>& instances, un
         else if(TopDie_rightmost <= BottomDie_leftmost){
             x = (TopDie_rightmost + BottomDie_leftmost) / 2;
         }
+
     }
     else if(TopDie_bottommost <= BottomDie_topmost && TopDie_bottommost >= BottomDie_bottommost && TopDie_topmost >= BottomDie_topmost){
         y = (TopDie_bottommost + BottomDie_topmost) / 2;
@@ -224,13 +213,11 @@ point Terminal_Placment::find_pos(unordered_map<string, instance>& instances, un
         x = -1;
         y = -1;
     }
-    cout << "x: " << x << " y: " << y << endl;
     point temp = transform_from_pos_to_grid(x , y);
     return temp;
 }
 
 point Terminal_Placment::lee_algorithm(int i, int j){ //find the closest point whose value is 0 from the point i,j
-    // cout << "original i j: " << i << " " << j << endl;
     queue<point> Q;
     Q.push(point(i,j));
     vector<vector<int>> temp;
@@ -264,23 +251,30 @@ point Terminal_Placment::lee_algorithm(int i, int j){ //find the closest point w
     return p;
 }
 
+bool net_compare(string a, string b){
+    return nets[a]->net_pin.size() < nets[b]->net_pin.size();
+}
+
 void Terminal_Placment::Thorolfsson_via_assignment(unordered_map<string, instance>& instances, unordered_map<string, net*>& nets){
     int temp = 0;
-    for(auto& it : nets){
-        if(it.second->is_cut()){
+    vector<string> net_string;
+    for(int i=0; i<nets.size(); i++){
+        net_string.push_back("N"+to_string(i+1));
+    }
+    sort(net_string.begin(), net_string.end(), net_compare);
+    for(int i=0; i<net_string.size(); i++){
+        if(nets[net_string[i]]->is_cut()){
             temp++;
-            point p = find_pos(instances, nets, it.second->Net_name);
-            cout << "p.x: " << p.x << " p.y: " << p.y << endl;
+            point p = find_pos(instances, nets, nets[net_string[i]]->Net_name);
             if(data[p.x][p.y]==0){ //if there is no terminal
                 data[p.x][p.y]=1;
                 point real_pos = transform_from_grid_to_pos(p.x,p.y);
-                it.second->terminal_pos = real_pos;
+                nets[net_string[i]]->terminal_pos = real_pos;
             }else{ //there is a terminal, find a closest place to put
                 point q = lee_algorithm(p.x, p.y);
-                cout << "q.x: " << q.x << " q.y: " << q.y << endl;
                 data[q.x][q.y]=1;
                 point real_pos = transform_from_grid_to_pos(q.x,q.y);
-                it.second->terminal_pos = real_pos;
+                nets[net_string[i]]->terminal_pos = real_pos;
             }
         }
     }

@@ -1,14 +1,7 @@
 #include "Kraftwerk2.h"
 
-Kraftwerk2::Kraftwerk2(int n, unordered_map<string, instance>& map){ //n: num instances
-    connectivity_mat = new Matrix(n);
-    move_force_mat_x = new Matrix(n);
-    move_force_mat_y = new Matrix(n);
-    demand_x = new Vector(n);
-    demand_y = new Vector(n);
-    solution_x = new Vector(n);
-    solution_y = new Vector(n);
-    w_i.resize(n);
+Kraftwerk2::Kraftwerk2(unordered_map<string, instance>& map){ //n: num instances
+    w_i.resize(Num_instance);
     //initial the D and phi array
     int die_width = die_upper_x - die_lower_x;
         D_top.resize(die_width/min(top_row_height,bottom_row_height));
@@ -29,22 +22,22 @@ Kraftwerk2::Kraftwerk2(int n, unordered_map<string, instance>& map){ //n: num in
         if(it.second.tech == TECH::TECH_A){
             acceptable_x_max = die_upper_x - tech_stack[0].libcells[it.second.libcell_type].width;
             if(it.second.part == PART::TOP){
-                w_i[n] = static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
+                w_i[n] = 0.2*static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
                 acceptable_y_max = top_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
             }
             else{
-                w_i[n] = static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
+                w_i[n] = 0.2*static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
                 acceptable_y_max = bottom_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
             }
             
         }else if(it.second.tech == TECH::TECH_B){
             acceptable_x_max = die_upper_x - tech_stack[1].libcells[it.second.libcell_type].width;
             if(it.second.part == PART::TOP){
-                w_i[n] = static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
+                w_i[n] = 0.2*static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
                 acceptable_y_max = top_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
             }
             else{
-                w_i[n] = static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
+                w_i[n] = 0.2*static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
                 acceptable_y_max = bottom_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
             }
         }
@@ -52,27 +45,17 @@ Kraftwerk2::Kraftwerk2(int n, unordered_map<string, instance>& map){ //n: num in
         mt19937 gen(rd());
         uniform_int_distribution<> distrib_x(die_lower_x,acceptable_x_max);
         uniform_int_distribution<> distrib_y(die_lower_y,acceptable_y_max);
-        solution_x->data[n] = distrib_x(gen);
-        solution_y->data[n] = distrib_y(gen);
+        solution_x(n) = distrib_x(gen);
+        solution_y(n) = distrib_y(gen);
     }
-    size = n;
-}
-
-Kraftwerk2::~Kraftwerk2(){ 
-    delete connectivity_mat;
-    delete move_force_mat_x;
-    delete move_force_mat_y;
-    delete demand_x;
-    delete demand_y;
-    delete solution_x;
-    delete solution_y;
+    size = Num_instance;
 }
 
 void Kraftwerk2::input_solution(unordered_map<string, instance>& map){
     for(auto& it : map){
         int n = parse_inst_name(it.first);
-        solution_x->data[n] = it.second.instance_pos.x ;
-        solution_y->data[n] = it.second.instance_pos.y ;
+        solution_x(n) = it.second.instance_pos.x ;
+        solution_y(n) = it.second.instance_pos.y ;
     }
 }
 
@@ -85,8 +68,8 @@ void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>
         int n = stoi(it->first.substr(1))-1;    
         //cout << it->first << endl;
         if(it->second.tech == TECH::TECH_A){         
-            float pos_x = solution_x->data[n];
-            float pos_y = solution_y->data[n];
+            float pos_x = solution_x(n);
+            float pos_y = solution_y(n);
             int width = tech_stack[0].libcells[it->second.libcell_type].width;
             int height = tech_stack[0].libcells[it->second.libcell_type].height;
             int initial_x;
@@ -117,8 +100,8 @@ void Kraftwerk2::cal_D(unordered_map<string,instance> ins, vector<vector<float>>
             }
         }   
         if(it->second.tech == TECH::TECH_B){            
-            float pos_x = solution_x->data[n];
-            float pos_y = solution_y->data[n];
+            float pos_x = solution_x(n);
+            float pos_y = solution_y(n);
             int width = tech_stack[1].libcells[it->second.libcell_type].width;
             int height = tech_stack[1].libcells[it->second.libcell_type].height;
             int initial_x;
@@ -377,24 +360,128 @@ int Kraftwerk2::parse_inst_name(string s){ //input: String("M12"), output: int 1
 void Kraftwerk2::get_solution(unordered_map<string, instance>& map){
     for(auto& it : map){
         int n = parse_inst_name(it.first);
-        it.second.instance_pos.x = solution_x->data[n] ;
-        it.second.instance_pos.y = solution_y->data[n] ;
+        it.second.instance_pos.x = solution_x(n) ;
+        it.second.instance_pos.y = solution_y(n) ;
+    }
+}
+
+void Kraftwerk2::update_bound(string net_name){
+    int left = INT32_MAX;
+    int right = INT32_MIN;
+    int up = INT32_MIN;
+    int bottom = INT32_MAX;
+    for(int i = 0; i < nets[net_name]->net_pin.size(); i++){
+        int j = parse_inst_name(nets[net_name]->net_pin[i].first);
+        if(instances[nets[net_name]->net_pin[i].first].tech == TECH::TECH_A){
+            if((solution_x(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x) < left){
+                left = solution_x(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x;
+                nets[net_name]->left_index = i;
+            }
+            if((solution_x(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x) > right){
+                right = solution_x(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x;
+                nets[net_name]->right_index = i;
+            }
+            if((solution_y(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y) < bottom){
+                bottom = solution_y(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y;
+                nets[net_name]->bottom_index = i;
+            }
+            if((solution_y(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y) > up){
+                up = solution_y(j) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y;
+                nets[net_name]->up_index = i;
+            }
+        }
+        else{
+            if((solution_x(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x) < left){
+                left = solution_x(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x;
+                nets[net_name]->left_index = i;
+            }
+            if((solution_x(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x) > right){
+                right = solution_x(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x;
+                nets[net_name]->right_index = i;
+            }
+            if((solution_y(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y) < bottom){
+                bottom = solution_y(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y;
+                nets[net_name]->bottom_index = i;
+            }
+            if((solution_y(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y) > up){
+                up = solution_y(j) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y;
+                nets[net_name]->up_index = i;
+            }
+        }
+    }
+}
+
+void Kraftwerk2::update_connectivity_y(int i, int j, string net_name){
+    int P = nets[net_name]->net_pin.size();
+    double y_p;
+    double y_q;
+    int m = parse_inst_name(nets[net_name]->net_pin[i].first);
+    int n = parse_inst_name(nets[net_name]->net_pin[j].first);
+    if(instances[nets[net_name]->net_pin[i].first].tech == TECH::TECH_A)
+        y_p = solution_y(m) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y;
+    else
+        y_p = solution_y(m) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.y;
+    
+    if(instances[nets[net_name]->net_pin[j].first].tech == TECH::TECH_A)
+        y_q = solution_y(n) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[j].first].libcell_type].pins[nets[net_name]->net_pin[j].second].pin_pos.y;
+    else
+        y_q = solution_y(n) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[j].first].libcell_type].pins[nets[net_name]->net_pin[j].second].pin_pos.y;
+    if(y_p != y_q){
+        double temp = 2/((P-1)*abs(y_p-y_q));
+        connectivity_mat_y(m,n) -= temp;
+        connectivity_mat_y(n,m) -= temp;
+        connectivity_mat_y(m,m) += temp;
+        connectivity_mat_y(n,n) += temp;
+    }
+}
+
+void Kraftwerk2::update_connectivity_x(int i, int j, string net_name){
+    int P = nets[net_name]->net_pin.size();
+    double x_p;
+    double x_q;
+    int m = parse_inst_name(nets[net_name]->net_pin[i].first);
+    int n = parse_inst_name(nets[net_name]->net_pin[j].first);
+    if(instances[nets[net_name]->net_pin[i].first].tech == TECH::TECH_A)
+        x_p = solution_x(m) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x;
+    else
+        x_p = solution_x(m) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[i].first].libcell_type].pins[nets[net_name]->net_pin[i].second].pin_pos.x;
+    
+    if(instances[nets[net_name]->net_pin[j].first].tech == TECH::TECH_A)
+        x_q = solution_x(n) + tech_stack[0].libcells[instances[nets[net_name]->net_pin[j].first].libcell_type].pins[nets[net_name]->net_pin[j].second].pin_pos.x;
+    else
+        x_q = solution_x(n) + tech_stack[1].libcells[instances[nets[net_name]->net_pin[j].first].libcell_type].pins[nets[net_name]->net_pin[j].second].pin_pos.x;
+    
+    if(x_p != x_q){
+        double temp = 2/((P-1)*abs(x_p-x_q));
+        connectivity_mat_x(m,n) -= temp;
+        connectivity_mat_x(n,m) -= temp;
+        connectivity_mat_x(m,m) += temp;
+        connectivity_mat_x(n,n) += temp;
     }
 }
 
 void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
-    int temp = 1;
     cout << "generating connectivity matrix ..\n";
+    connectivity_mat_x.setZero();
+    connectivity_mat_y.setZero();
     for(auto& it : map){
-        int n =it.second->net_pin.size();
-        for(int i=0; i<n; i++){
-            for(int j=i+1; j<n; j++){
-                int k = parse_inst_name(it.second->net_pin[i].INSTANCE);
-                int l = parse_inst_name(it.second->net_pin[j].INSTANCE);
-                connectivity_mat->data[k][l] -= temp;
-                connectivity_mat->data[l][k] -= temp;
-                connectivity_mat->data[k][k] += temp;
-                connectivity_mat->data[l][l] += temp;
+        update_bound(it.first);
+        int k = it.second->left_index;
+        int l = it.second->right_index;
+        int i = it.second->up_index;
+        int j = it.second->bottom_index;
+        for(int m = 0; m < it.second->net_pin.size(); m++){
+            if(k != m && k != l){
+                update_connectivity_x(k,m,it.first);
+            }
+            if(l != m){
+                update_connectivity_x(l,m,it.first);
+            }
+            if(i != m && i != j){
+                update_connectivity_y(i,m,it.first);
+            }
+            if(j != m){
+                update_connectivity_y(j,m,it.first);
             }
         }
     }
@@ -403,16 +490,32 @@ void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
 
 void Kraftwerk2::print_mat(){
     cout << "connectivity mat: \n"; 
-    connectivity_mat->print_data();
+    for(int i = 0; i < Num_instance; i++){
+        for(int j = 0; j < Num_instance; j++){
+            cout << connectivity_mat_x(i,j) << " ";
+        }
+        cout << endl;
+    }
+    
     cout << " move_force_mat_x: \n"; 
-    move_force_mat_x->print_data();
+    for(int i = 0; i < Num_instance; i++){
+        for(int j = 0; j < Num_instance; j++){
+            cout << move_force_mat_x(i,j) << " ";
+        }
+        cout << endl;
+    }
     return;
 }
 
 void Kraftwerk2::print_solution(fstream& fout){
-    //cout << "current solution: \n";
-    solution_x -> print_data(fout);
-    solution_y -> print_data(fout);
+    for(int i = 0; i < Num_instance; i++){
+        fout << solution_x(i) << " ";    
+    }
+    fout << endl;
+    for(int i = 0; i < Num_instance; i++){
+        fout << solution_y(i) << " ";    
+    }
+    fout << endl;
     return;
 }
 
@@ -422,7 +525,7 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
     int i = static_cast<int>(x/delta-0.5); //bounding box
     int j = static_cast<int>(y/delta-0.5);
     float slope = 1;
-    //cout << i << " " << j << endl;
+
     float val=0, grad_x, grad_y;
     int temp_upper_y = 0;
     if(part == PART::TOP){
@@ -431,96 +534,6 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
     else{
         temp_upper_y = bottom_die_upper_y + die_lower_y;
     }
-    // if(i >= (die_upper_x-die_lower_x)/delta-1 || i<=0 || j >= (temp_upper_y-die_lower_y)/delta-1 || j<=0){
-    //     if(i >= (die_upper_x-die_lower_x)/delta-1){ //right border
-    //         if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
-    //             grad_x = slope;
-    //             grad_y = slope;
-    //         }else if(j<=0){
-    //             grad_x = slope;
-    //             grad_y = -1*slope;
-    //         }else{
-    //             grad_x = slope;
-    //             float w1 = y - delta*(j+0.5);
-    //             float w2 = delta*(j+1.5) - y;
-    //             i = (die_upper_x-die_lower_x)/delta-1;
-    //             val = (w1*phi[i][j+1] + w2*phi[i][j])/delta;
-    //             int l = (y/delta-j >= 0.5) ? j+1 : j;
-    //             if(l==j){
-    //                 grad_y = (val - phi[i][l])/(w1*delta);
-    //             }else{
-    //                 grad_y = (phi[i][l] - val)/(w2*delta);
-    //             }
-    //         }
-    //     }else if(i<=0){ //left border
-    //         if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border
-    //             grad_x = -1*slope;
-    //             grad_y = slope;
-    //         }else if(j<=0){
-    //             grad_x = -1*slope;
-    //             grad_y = -1*slope;
-    //         }else{
-    //             grad_x = -1*slope;
-    //             float w1 = y - delta*(j+0.5);
-    //             float w2 = delta*(j+1.5) - y;
-    //             i = 0;
-    //             val = (w1*phi[i][j+1] + w2*phi[i][j])/delta;
-    //             int l = (y/delta-j >= 0.5) ? j+1 : j;
-    //             if(l==j){
-    //                 grad_y = (val - phi[i][l])/(w1*delta);
-    //             }else{
-    //                 grad_y = (phi[i][l] - val)/(w2*delta);
-    //             }
-    //         }
-    //     }else if(j >= (temp_upper_y-die_lower_y)/delta-1){ // top border mid
-    //         grad_y = slope;
-    //         float l1 = x - delta*(i+0.5);
-    //         float l2 = delta*(i+1.5) - x;
-    //         int k = (x/delta-i >= 0.5) ? i+1 : i;
-    //         j = (temp_upper_y-die_lower_y)/delta-1;
-    //         if(k==i){
-    //             grad_x = (val - phi[k][j])/(delta*l1);
-    //         }else{
-    //             grad_x = (phi[k][j] - val)/(delta*l2);
-    //         }
-    //     }else if(j<=0){
-    //         grad_y = -1*slope;
-    //         float l1 = x - delta*(i+0.5);
-    //         float l2 = delta*(i+1.5) - x;
-    //         int k = (x/delta-i >= 0.5) ? i+1 : i;
-    //         j = 0;
-    //         if(k==i){
-    //             grad_x = (val - phi[k][j])/(delta*l1);
-    //         }else{
-    //             grad_x = (phi[k][j] - val)/(delta*l2);
-    //         }
-    //     }
-    // }else{ //center
-    //     int k = (x/delta-i >= 0.5) ? i+1 : i; //closest point
-    //     int l = (y/delta-j >= 0.5) ? j+1 : j;
-    //     float l1 = x - delta*(i+0.5);
-    //     float l2 = delta*(i+1.5) - x;
-    //     float w1 = y - delta*(j+0.5);
-    //     float w2 = delta*(j+1.5) - y;
-    //     val = (l2*w2*phi[i][j]+l1*w2*phi[i+1][j]+l2*w1*phi[i][j+1]+l1*w1*phi[i+1][j+1])/(delta*delta);
-    //     if(k==i){
-    //         if(l==j){
-    //             grad_x = (val - phi[k][l])/(delta*l1);
-    //             grad_y = (val - phi[k][l])/(delta*w1);
-    //         }else{
-    //             grad_x = (val - phi[k][l])/(delta*l1);
-    //             grad_y = (phi[k][l] - val)/(delta*w2);
-    //         }
-    //     }else{
-    //         if(l==j){
-    //             grad_x = (phi[k][l] - val)/(delta*l2);
-    //             grad_y = (val - phi[k][l])/(delta*w1);
-    //         }else{
-    //             grad_x = (phi[k][l] - val)/(delta*l2);
-    //             grad_y = (phi[k][l] - val)/(delta*w2);
-    //         }
-    //     }
-    // }
     
     int k = (x/delta-i >= 0.5) ? i+1 : i; //closest point
     int l = (y/delta-j >= 0.5) ? j+1 : j;
@@ -528,6 +541,7 @@ pair<float, float> Kraftwerk2::single_point_gradient(vector<vector<float>> phi, 
     float l2 = delta*(i+1.5) - x;
     float w1 = y - delta*(j+0.5);
     float w2 = delta*(j+1.5) - y;
+
     if(i+1<phi.size()){
         if(j+1<phi[0].size()){
             val += l1*w1*phi[i+1][j+1];
@@ -601,22 +615,6 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
     }
     cal_D(map, D_top, D_bottom);
     cal_phi(D_top, phi_top, D_bottom, phi_bottom, 10);
-    /*
-    for(int j=0; j<D.capacity(); j++){
-        for(int k=0; k<D[j].capacity(); k++){
-            cout << D[j][k] << " ";
-        }
-        cout << endl;
-    }
-    
-    cout << "phi: " << endl;
-    for(int j=0; j<D.capacity(); j++){
-        for(int k=0; k<D[j].capacity(); k++){
-            cout << phi[j][k] << " ";
-        }
-        cout << endl;
-    }
-    */
     int delta = min(top_row_height,bottom_row_height);
     for(auto& it : map){
         int n = parse_inst_name(it.first);
@@ -630,125 +628,59 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
         else{
             width = tech_stack[1].libcells[it.second.libcell_type].width;
             height = tech_stack[1].libcells[it.second.libcell_type].height;
-        }
-        
-        
-        
-        
+        }       
 
         pair<float,float> p;
         if(it.second.part == PART::TOP)
-            p = single_point_gradient(phi_top,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
+            p = single_point_gradient(phi_top,solution_x(n)+static_cast<float>(width)/2,solution_y(n)+static_cast<float>(height)/2,it.second.part);
         else
-            p = single_point_gradient(phi_bottom,solution_x->data[n]+static_cast<float>(width)/2,solution_y->data[n]+static_cast<float>(height)/2,it.second.part);
-        demand_x->data[n] = p.first;
-        demand_y->data[n] = p.second;
-        move_force_mat_x->data[n][n] = w_i[n];
-        move_force_mat_y->data[n][n] = w_i[n];
-/*
-        fout << it.second.instance_pos.x << " " << it.second.instance_pos.y << " ";
-        fout << move_force_mat_x->data[n][n] << " " << move_force_mat_y->data[n][n] << endl;
-*/
+            p = single_point_gradient(phi_bottom,solution_x(n)+static_cast<float>(width)/2,solution_y(n)+static_cast<float>(height)/2,it.second.part);
+        
+        demand_x(n) = p.first;
+        demand_y(n) = p.second;
+        move_force_mat_x(n,n) = w_i[n];
+        move_force_mat_y(n,n) = w_i[n];
     }
-    //move_force_mat_x->print_data();
-
+    return;
 }
 
-void Kraftwerk2::update_pos_diff(int phase, fstream& fout){
-    //Cholesky
-    // Matrix C_x(size), C_y(size), LT_x(size), L_x(size), L_y(size), LT_y(size);
-    //PLU
-    Matrix C_x(size), C_y(size), P_x(size), L_x(size), U_x(size), P_y(size), L_y(size), U_y(size);
-    //conjugate
-    // Matrix C_x(size), C_y(size);
-    Matrix temp = *connectivity_mat;
-    // float scalar = 1;
-    // if(phase == 1){
-    //     Matrix_scalar(*move_force_mat_x,scalar);
-    //     Matrix_scalar(*move_force_mat_y,scalar);
-    // }
-    // else{
-    //     Matrix_scalar(temp,scalar);
-    // }
-    Matrix_Addition(temp, *move_force_mat_x, C_x);
-    Matrix_Addition(temp, *move_force_mat_y, C_y);
-    // C_x.Cholesky_decomposition(L_x,LT_x);
-    // C_y.Cholesky_decomposition(L_y,LT_y);
+void Kraftwerk2::update_pos_diff(fstream& fout){
+    Eigen::MatrixXd C_x(size,size), C_y(size,size);
+
+    C_x = connectivity_mat_x + move_force_mat_x;
+    C_y = connectivity_mat_y + move_force_mat_y;
+    Eigen::VectorXd b_x(size), b_y(size);
+    Eigen::VectorXd delta_x(size), delta_y(size);
+    b_x = move_force_mat_x * demand_x;
+    b_y = move_force_mat_y * demand_y;
 /*
-    for(int i = 0; i < size; i++){
-        for(int j = 0; j < size; j++){
-            fout << C_x.data[i][j] << " ";
-        }
-    }
-    fout << endl;
+    SimplicialLLT<SparseMatrix<double> > solver1;
+    SimplicialLLT<SparseMatrix<double> > solver2;
+    solver1.compute(C_x);
+    solver2.compute(C_y);
+    delta_x = solver1.solve(b_x);
+    delta_y = solver2.solve(b_y);
 */
-    C_x.PLU_decomposition(L_x, U_x, P_x);
-    C_y.PLU_decomposition(L_y, U_y, P_y);
-    /*
-    cout << "P_x:" << endl;
-    P_x->print_data();
-    cout << endl;
-    P_y->print_data();
-    */
-    Vector b_x(size), b_y(size);
-    Vector delta_x(size), delta_y(size);
-    Matrix_Vector_Prod(*move_force_mat_x, *demand_x, b_x);
-    Matrix_Vector_Prod(*move_force_mat_y, *demand_y, b_y);
-/*
-    for(int i = 0; i < size; i++){
-        fout << b_x.data[i] << " ";
-    }
-    fout << endl;
-*/
-    //move_force_mat_x->print_data();
-    // for(int i = 0; i < size; i++){
-    //     cout << demand_x->data[i] << " ";
-    // }
-    // cout << endl;
-    // cout << norm(b_x) << endl;
-    // for(int i = 0; i < size; i++){
-    //     cout << b_x.data[i] << " ";
-    // }
-    // delta_x = conjugate_gradient(C_x,b_x);
-    // delta_y = conjugate_gradient(C_y,b_y);
-    // for(int i = 0; i < size; i++){
-    //     cout << delta_x.data[i] << " ";
-    // }
-    // cout << endl;
-     //PLU
-    b_x = Vector_scalar(b_x,0.03);
-    b_y = Vector_scalar(b_y,0.03);
-    solve_linear_system(P_x, L_x, U_x, b_x, delta_x);
-    solve_linear_system(P_y, L_y, U_y, b_y, delta_y);
-    // solve_linear_system_via_Cholesky(L_x,LT_x,b_x,delta_x);
-    // solve_linear_system_via_Cholesky(L_y,LT_y,b_y,delta_y);
-    cout << norm(delta_x) << endl;
-    for(int i=0; i<size; i++){
-        solution_x->data[i] -= delta_x.data[i];
-        solution_y->data[i] -= delta_y.data[i];
-    }
-    /*
-    for(int i = 0; i<size; i++)
-        cout << delta_x->data[i] << " ";
-    cout << endl;
-    */
+    delta_x = C_x.llt().solve(b_x);
+    delta_y = C_y.llt().solve(b_y);
+    solution_x = solution_x - delta_x;
+    solution_y = solution_y - delta_y;
+    cout << delta_x.norm() << endl;
     return;
 }
 
 void Kraftwerk2::Kraftwerk2_global_placement(unordered_map<string,instance>& ins, fstream& fout){
-    for(int i=0; i<1; i++){
-        int phase;
+    cout << "global placement started\n";
+    for(int i=0; i<50; i++){
+        if(i%10 == 0){
+            gen_connectivity_matrix(nets);
+        }
         calc_gradient(ins,fout);
-        if(i < 20)
-            phase = 1;
-        else
-            phase = 2;
-        update_pos_diff(phase,fout);
+        update_pos_diff(fout);
         //print_solution(fout);
     }
-    cout << "global placement finished \n";
+    cout << "\nglobal placement finished. \n";
     get_solution(ins);
     
 }
 
-//init_penalty

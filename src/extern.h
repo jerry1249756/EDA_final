@@ -20,6 +20,7 @@ extern int top_row_height, bottom_row_height;
 extern unsigned long long int TOP_area, BOTTOM_area;
 extern int top_die_upper_y, bottom_die_upper_y;
 extern unordered_map<string, net*> nets;
+extern int Num_instance;
 
 
 #endif

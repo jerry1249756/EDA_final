@@ -51,6 +51,9 @@ long long int Neighborhood::calc_cost(unordered_map<string, instance>& instances
 }
 
 void Neighborhood::single_net_cost(unordered_map<string, instance>& instances, unordered_map<string, net*>& nets, string netname){
+    // nets[netname]->update_bound(instances,tech_stack)
+    
+    
     int SingleNet_cost = 0;
     int TopDie_rightmost = INT32_MIN;
     int TopDie_leftmost = INT32_MAX;
@@ -91,6 +94,7 @@ void Neighborhood::single_net_cost(unordered_map<string, instance>& instances, u
         if(TopDie_bottommost>BottomDie_topmost) SingleNet_cost += TopDie_bottommost-BottomDie_topmost;
     }
     nets[netname]->cost = SingleNet_cost;
+    
 }
 
 void Neighborhood::place_instance_to_each_row(unordered_map<string, instance>& instances, vector<vector<int>>& topdie_row, vector<vector<int>>& bottomdie_row){
