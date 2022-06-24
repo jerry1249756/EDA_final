@@ -182,3 +182,5 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
         }
     }
 }
+
+
