@@ -88,10 +88,14 @@ class net{
         distribution dist;
         bool is_cut();
         point terminal_pos = point(0,0);
-        int left_index;
-        int right_index;
-        int up_index;
-        int bottom_index;
+        string top_left;
+        string top_right;
+        string top_up;
+        string top_bottom;
+        string bottom_left;
+        string bottom_right;
+        string bottom_up;
+        string bottom_bottom;
 };
 
 int manhat_dist(point, point);

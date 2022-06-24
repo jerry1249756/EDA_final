@@ -19,10 +19,10 @@ class Kraftwerk2{
         void cal_D(unordered_map<string,instance>,vector<vector<float>>&,vector<vector<float>>&);//int 0 represent top, int 1 represent bottom
         void cal_phi(vector<vector<float>>, vector<vector<float>>&,vector<vector<float>>, vector<vector<float>>&,int);
         int parse_inst_name(string);
-        void update_bound(string);
-        void update_connectivity_x(int,int,string);
-        void update_connectivity_y(int,int,string);
-        void gen_connectivity_matrix(unordered_map<string, net*>); //C
+        // void update_bound(string);
+        // void update_connectivity_x(int,int,string);
+        // void update_connectivity_y(int,int,string);
+        // void gen_connectivity_matrix(unordered_map<string, net*>); //C
         void print_mat();
         void print_solution(fstream&);
         void get_solution(unordered_map<string, instance>&);

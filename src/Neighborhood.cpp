@@ -51,9 +51,6 @@ long long int Neighborhood::calc_cost(unordered_map<string, instance>& instances
 }
 
 void Neighborhood::single_net_cost(unordered_map<string, instance>& instances, unordered_map<string, net*>& nets, string netname){
-    // nets[netname]->update_bound(instances,tech_stack)
-    
-    
     int SingleNet_cost = 0;
     int TopDie_rightmost = INT32_MIN;
     int TopDie_leftmost = INT32_MAX;
@@ -94,7 +91,6 @@ void Neighborhood::single_net_cost(unordered_map<string, instance>& instances, u
         if(TopDie_bottommost>BottomDie_topmost) SingleNet_cost += TopDie_bottommost-BottomDie_topmost;
     }
     nets[netname]->cost = SingleNet_cost;
-    
 }
 
 void Neighborhood::place_instance_to_each_row(unordered_map<string, instance>& instances, vector<vector<int>>& topdie_row, vector<vector<int>>& bottomdie_row){
@@ -310,21 +306,77 @@ int Neighborhood::two_die_swap_cost(unordered_map<string, instance>& ins, unorde
     return cost;
 }
 
-// int Neighborhood::move_in_row_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
-//     int cost = 0;
-//     int before, after;
-//     int temp_x;
-//     temp_x = find_pos_x(die_row[from_row][from_col], ins);
-//     instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = to_x;
-//     for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
-//         before = nets[find_connected(die_row[from_row][from_col], ins)[i]]->cost;
-//         single_net_cost(ins, nets, find_connected(die_row[from_row][from_col], ins)[i]);
-//         after = nets[find_connected(die_row[from_row][from_col], ins)[i]]->cost;
-//         cost += after - before;
-//     }
-//     instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = temp_x;
-//     return cost;
-// }
+pair<int,double> Neighborhood::move_in_row_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& die_row, int from_row, int from_col){
+    int cost = 0;
+    int before, after;
+    double temp_x;
+    double to_x;
+    int width;
+    if(instances["C"+to_string(die_row[from_row][from_col])].tech == TECH::TECH_A)
+        width = tech_stack[0].libcells[instances["C"+to_string(die_row[from_row][from_col])].libcell_type].width;
+    else
+        width = tech_stack[1].libcells[instances["C"+to_string(die_row[from_row][from_col])].libcell_type].width;
+    if(from_col == die_row[from_row].size()-1){
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_real_distribution<> distrib(instances["C"+to_string(die_row[from_row][from_col-1])].instance_pos.x,die_upper_x-width);
+        to_x = distrib(gen);
+    }
+    else if(from_col == 0){
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_real_distribution<> distrib(0,instances["C"+to_string(die_row[from_row][from_col+1])].instance_pos.x);
+        to_x = distrib(gen);
+    }
+    else{
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_real_distribution<> distrib(instances["C"+to_string(die_row[from_row][from_col-1])].instance_pos.x,instances["C"+to_string(die_row[from_row][from_col+1])].instance_pos.x);
+        to_x = distrib(gen);
+    }
+    temp_x = find_pos_x(die_row[from_row][from_col], ins);
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = to_x;
+    for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
+        before = find_connected(die_row[from_row][from_col], ins)[i]->cost;
+        single_net_cost(ins, nets, find_connected(die_row[from_row][from_col], ins)[i]->Net_name);
+        after = find_connected(die_row[from_row][from_col], ins)[i]->cost;
+        cost += after - before;
+    }
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = temp_x;
+    for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
+        single_net_cost(ins, nets, find_connected(die_row[from_row][from_col], ins)[i]->Net_name);
+    }
+    return make_pair(cost,to_x);
+}
+
+/*
+int Neighborhood::left_move_in_row_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& die_row, int from_row, int from_col){
+    int cost = 0;
+    int before, after;
+    int temp_x;
+    int width;
+    if(from_col == 0){
+        return 0;
+    }
+    temp_x = find_pos_x(die_row[from_row][from_col], ins);
+    if(instances["C"+to_string(die_row[from_row][from_col])].tech == TECH::TECH_A)
+        width = tech_stack[0].libcells[instances["C"+to_string(die_row[from_row][from_col-1])].libcell_type].width;
+    else
+        width = tech_stack[1].libcells[instances["C"+to_string(die_row[from_row][from_col-1])].libcell_type].width;
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = instances["C"+to_string(die_row[from_row][from_col-1])].instance_pos.x + width;
+    for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
+        before = find_connected(die_row[from_row][from_col], ins)[i]->cost;
+        single_net_cost(ins, nets, find_connected(die_row[from_row][from_col], ins)[i]->Net_name);
+        after = find_connected(die_row[from_row][from_col], ins)[i]->cost;
+        cost += after - before;
+    }
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = temp_x;
+    for(int i=0; i<find_connected(die_row[from_row][from_col], ins).size(); i++){
+        single_net_cost(ins, nets, find_connected(die_row[from_row][from_col], ins)[i]->Net_name);
+    }
+    return cost;
+}
+*/
 
 // int Neighborhood::move_between_row_cost(unordered_map<string, instance>& ins, unordered_map<string, net*>& nets, vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
 //     int cost = 0;
@@ -390,10 +442,22 @@ void Neighborhood::update_two_die_swap(vector<vector<int>>& from_die_row, vector
     sort_single_row(to_die_row, to_row);
 }
 
-// void Neighborhood::update_move_in_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_x){
-//     instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = to_x;
-//     sort_single_row(die_row, from_row);
-// }
+void Neighborhood::update_move_in_row(vector<vector<int>>& die_row, int from_row, int from_col, double to_x){
+    instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = to_x;
+}
+
+/*
+void Neighborhood::update_left_move_in_row(vector<vector<int>>& die_row, int from_row, int from_col){
+    if(from_col != 0){
+        int width;
+        if(instances["C"+to_string(die_row[from_row][from_col])].tech == TECH::TECH_A)
+            width = tech_stack[0].libcells[instances["C"+to_string(die_row[from_row][from_col-1])].libcell_type].width;
+        else
+            width = tech_stack[1].libcells[instances["C"+to_string(die_row[from_row][from_col-1])].libcell_type].width;
+        instances["C"+to_string(die_row[from_row][from_col])].instance_pos.x = instances["C"+to_string(die_row[from_row][from_col-1])].instance_pos.x + width;
+    }
+}
+*/
 
 // void Neighborhood::update_move_between_row(vector<vector<int>>& die_row, int from_row, int from_col, int to_y){
 //     if(find_part(die_row[from_row][from_col], instances) == PART::TOP){
