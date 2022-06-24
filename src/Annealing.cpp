@@ -38,22 +38,22 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
         for(int i = 0; i < innerloop; i++){
             random_device rd;
             mt19937 gen(rd());
-            uniform_int_distribution<> distrib1(1,2);
+            uniform_int_distribution<int> distrib1(1,2);
             int temp = distrib1(gen);
-            uniform_int_distribution<> distrib2(0,toptop2.size()-1);
+            uniform_int_distribution<int> distrib2(0,toptop2.size()-1);
             int int1 = distrib2(gen);
             int int2 = distrib2(gen);
-            uniform_int_distribution<> distrib3(0,toptop2[int1].size()-1);
+            uniform_int_distribution<int> distrib3(0,toptop2[int1].size()-1);
             int int3 = distrib3(gen);
-            uniform_int_distribution<> distrib4(0,toptop2[int2].size()-1);
+            uniform_int_distribution<int> distrib4(0,toptop2[int2].size()-1);
             int int4 = distrib4(gen);
 
-            uniform_int_distribution<> distrib5(0,botbot2.size()-1);
+            uniform_int_distribution<int> distrib5(0,botbot2.size()-1);
             int int5 = distrib5(gen);
             int int6 = distrib5(gen);
-            uniform_int_distribution<> distrib6(0,botbot2[int5].size()-1);
+            uniform_int_distribution<int> distrib6(0,botbot2[int5].size()-1);
             int int7 = distrib6(gen);
-            uniform_int_distribution<> distrib7(0,botbot2[int6].size()-1);
+            uniform_int_distribution<int> distrib7(0,botbot2[int6].size()-1);
             int int8 = distrib7(gen);
 
             int differ;
@@ -93,7 +93,7 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
 
             random_device rd_2;
             mt19937 gen2(rd_2());
-            uniform_real_distribution<> distrib8(0,1);
+            uniform_real_distribution<double> distrib8(0,1);
             double temp_rand = distrib8(gen2);
             if(differ < 0 || temp_rand < exp(-double(differ)/double(T))){
                 switch(temp){

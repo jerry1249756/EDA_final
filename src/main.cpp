@@ -6,6 +6,7 @@
 #include "Kraftwerk2.h"
 #include "Legalization.h"
 #include "place_terminal.h"
+#include "global_place.h"
 using namespace std;
 
 vector<vector<int>> toptop2;
@@ -152,46 +153,77 @@ int main(int argc, char* argv[]){
 
     // cost test
     Neighborhood nei;
-    Kraftwerk2 k1(instances);
+    //Kraftwerk2 k1(instances);
     //k1.print_solution();
-    k1.get_solution(instances);    
+    // k1.get_solution(instances);    
+    placement();
     long long int temp3 = nei.calc_cost(instances ,nets);
+
     // long long int temp4 = nei.init_penalty(instances, toptop, botbot);
-    k1.input_solution(instances);
+    // k1.input_solution(instances);
     //k1.gen_connectivity_matrix(nets);
     //k1.print_mat();
     //k1.calc_gradient(instances);
     //k1.update_pos_diff();
-/*
+
+    // for(auto it = instances.begin(); it != instances.end(); ++it){
+    //     fout << it->first << " ";
+    //     if(it->second.part == PART::TOP){
+    //         fout << "top ";
+    //     }
+    //     else{
+    //         fout << "bottom ";
+    //     }
+    //     if(it->second.tech == TECH::TECH_A){
+    //         fout << tech_stack[0].libcells[it->second.libcell_type].width << " ";
+    //         fout << tech_stack[0].libcells[it->second.libcell_type].height << " ";
+    //     }
+    //     else{
+    //         fout << tech_stack[1].libcells[it->second.libcell_type].width << " ";
+    //         fout << tech_stack[1].libcells[it->second.libcell_type].height << " ";
+    //     }
+    //     fout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
+    //     fout << endl;
+    // }
+    // for(int i = 0; i < Num_instance; i++){
+    //     fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
+    // }
+    // fout << endl;
+    // for(int i = 0; i < Num_instance; i++){
+    //     fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
+    // }
+    // fout << endl;
+
+
     for(auto it = instances.begin(); it != instances.end(); ++it){
-        fout << it->first << " ";
+        cout << it->first << " ";
         if(it->second.part == PART::TOP){
-            fout << "top ";
+            cout << "top ";
         }
         else{
-            fout << "bottom ";
+            cout << "bottom ";
         }
         if(it->second.tech == TECH::TECH_A){
-            fout << tech_stack[0].libcells[it->second.libcell_type].width << " ";
-            fout << tech_stack[0].libcells[it->second.libcell_type].height << " ";
+            cout << tech_stack[0].libcells[it->second.libcell_type].width << " ";
+            cout << tech_stack[0].libcells[it->second.libcell_type].height << " ";
         }
         else{
-            fout << tech_stack[1].libcells[it->second.libcell_type].width << " ";
-            fout << tech_stack[1].libcells[it->second.libcell_type].height << " ";
+            cout << tech_stack[1].libcells[it->second.libcell_type].width << " ";
+            cout << tech_stack[1].libcells[it->second.libcell_type].height << " ";
         }
-        fout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
-        fout << endl;
+        cout << it->second.instance_pos.x << " " << it->second.instance_pos.y;
+        cout << endl;
     }
     for(int i = 0; i < Num_instance; i++){
-        fout << instances["C"+to_string(i+1)].instance_pos.x << " ";
+        cout << instances["C"+to_string(i+1)].instance_pos.x << " ";
     }
-    fout << endl;
+    cout << endl;
     for(int i = 0; i < Num_instance; i++){
-        fout << instances["C"+to_string(i+1)].instance_pos.y << " ";
+        cout << instances["C"+to_string(i+1)].instance_pos.y << " ";
     }
-    fout << endl;
-*/
-    
+    cout << endl;
+
+
 /*
     for(auto& it : nets){
         cout << "dist: " << it.second->dist.first << " " <<  it.second->dist.second << endl;
@@ -234,7 +266,14 @@ int main(int argc, char* argv[]){
 */
     nei.place_instance_to_each_row(instances, toptop2, botbot2);
     nei.sort_row(toptop2, botbot2);
-
+    for(int i = 0; i < Num_instance; i++){
+        cout << instances["C"+to_string(i+1)].instance_pos.x << " ";
+    }
+    cout << endl;
+    for(int i = 0; i < Num_instance; i++){
+        cout << instances["C"+to_string(i+1)].instance_pos.y << " ";
+    }
+    cout << endl;
     long long int temp = nei.calc_cost(instances ,nets);
     stretch(toptop2,botbot2);
     long long int temp5 = nei.calc_cost(instances ,nets);

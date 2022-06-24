@@ -9,9 +9,9 @@ all	: bin/partition
 	@echo -n "make complete!"
 
 # optimized version
-bin/partition: main_opt.o FM.o partition.o module.o Kraftwerk2.o LA.o Neighborhood.o Annealing.o Legalization.o place_terminal.o
-	$(CC) $(OPTFLAGS) main_opt.o FM.o partition.o module.o Kraftwerk2.o LA.o Neighborhood.o Annealing.o Legalization.o place_terminal.o -o bin/partition
-main_opt.o: src/main.cpp src/FM_alg.h src/partition.h src/module.h src/Neighborhood.h src/Kraftwerk2.h src/Annealing.h src/Legalization.h src/place_terminal.h
+bin/partition: main_opt.o FM.o partition.o module.o Kraftwerk2.o LA.o Neighborhood.o Annealing.o Legalization.o place_terminal.o global_place.o
+	$(CC) $(OPTFLAGS) main_opt.o FM.o partition.o module.o Kraftwerk2.o LA.o Neighborhood.o Annealing.o Legalization.o place_terminal.o global_place.o -o bin/partition
+main_opt.o: src/main.cpp src/FM_alg.h src/partition.h src/module.h src/Neighborhood.h src/Kraftwerk2.h src/Annealing.h src/Legalization.h src/place_terminal.h src/global_place.h
 	$(CC) $(CFLAGS) $(INCLUDE) $< -o $@ 
 
 FM.o: src/FM_alg.cpp src/FM_alg.h src/extern.h
@@ -31,6 +31,8 @@ Annealing.o: src/Annealing.cpp src/Annealing.h
 Legalization.o: src/Legalization.cpp src/Legalization.h
 	$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
 place_terminal.o: src/place_terminal.cpp src/place_terminal.h
+	$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
+global_place.o: src/global_place.cpp src/global_place.h
 	$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
 
 # clean all the .o and executable files

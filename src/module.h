@@ -19,13 +19,14 @@ class net;
 
 class point{
     public:
-        float x;
-        float y;
+        int x;
+        int y;
         point(){ x=0; y=0; }
         point(int a, int b){ x=a; y=b; }
         point(const point& p1){ x = p1.x; y=p1.y; }
         point operator + (point);
         point operator - (point);
+        point operator = (point);
 };
 
 struct pin{
@@ -54,6 +55,7 @@ class instance{
         vector<net*> connected_nets;
         PART part; 
         TECH tech;
+        int connectivity=0;
         void set_pos(point);
 };
 

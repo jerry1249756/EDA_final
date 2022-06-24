@@ -13,6 +13,12 @@ point point::operator - (point temp){
     res.y = y - temp.y;
     return res;
 };
+point point::operator = (point temp){
+    point res;
+    res.x = temp.x;
+    res.y = temp.y;
+    return res;
+}
 /*
 libcell::libcell(int w,int h){
     width = w;
@@ -148,3 +154,9 @@ pair<string, string> split_string(string& s){
     s.erase(0, temp+1);
     return make_pair(a,s);
 }
+
+
+
+
+
+
