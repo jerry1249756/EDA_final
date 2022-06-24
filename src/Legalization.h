@@ -7,7 +7,7 @@
 #include <string>
 
 void stretch(vector<vector<int>>&, vector<vector<int>>&);
-
+void press(vector<vector<int>>&, vector<vector<int>>&);
 
 
 #endif

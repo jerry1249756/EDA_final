@@ -1,11 +1,11 @@
 #include "Annealing.h"
 
 float control_alpha(int later_cost, int ori_cost){
-    if(ori_cost - later_cost > 30000){
+    if(ori_cost - later_cost > 50000){
         return 0.95;
     }
     else
-        return 0.8;
+        return 0.85;
     // return 1 + 0.01*(ori_cost - later_cost)/instances.size(); // need to test, linear about later_cost and ori_cost 
     // return 0.85;
 }
@@ -24,18 +24,22 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
         toptech = 0;
         bottomtech = 0;
     }
-    float T = 2000; //need to test
-    float frozen_T = 0.5; //need to test
+    float T = 3000; //need to test
+    float frozen_T = 0.25; //need to test
     int innerloop = 200; //need to test
     float alpha; // 0 < alpha < 1
     int num_nei = 3; //number of neighberhood structure
+    double to_x;
     long long int original_cost = nei.calc_cost(ins, nets);
+    for(auto& it : nets){
+        it.second->update_bound(instances, tech_stack);
+    }
     while(T > frozen_T){
         for(int i = 0; i < innerloop; i++){
             random_device rd;
             mt19937 gen(rd());
-            uniform_int_distribution<> distrib1(3,7);
-            int temp = distrib1(gen)/3;
+            uniform_int_distribution<> distrib1(1,2);
+            int temp = distrib1(gen);
             uniform_int_distribution<> distrib2(0,toptop2.size()-1);
             int int1 = distrib2(gen);
             int int2 = distrib2(gen);
@@ -53,6 +57,7 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
             int int8 = distrib7(gen);
 
             int differ;
+            pair<int,double> p1;
             switch(temp){
                 default:
                     break;
@@ -64,18 +69,25 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
                     differ = nei.swap_cost(ins, nets, botbot2, int5, int7, int6, int8);
                            //+ nei.swap_penalty(botbot2, botbot2, int5, int7, int6, int8);
                     break;
-                case 3:
-                    differ = nei.two_die_swap_cost(ins, nets, toptop2, botbot2, int1, int3, int5, int7);
-                           //+ nei.swap_penalty(toptop2, botbot2, int1, int3, int5, int7);
-                    break;
-                // case 4:
-                //     differ = nei.two_die_swap_cost(ins, nets, botbot2, toptop2, int5, int7, int1, int3);
+                // case 3:
+                //     differ = nei.two_die_swap_cost(ins, nets, toptop2, botbot2, int1, int3, int5, int7);
+                //            //+ nei.swap_penalty(toptop2, botbot2, int1, int3, int5, int7);
                 //     break;
+                case 3:
+                    p1 = nei.move_in_row_cost(instances,nets,toptop2,int1,int3);
+                    differ = p1.first;
+                    to_x = p1.second;
+                    break;
+                case 4:
+                    p1 = nei.move_in_row_cost(instances,nets,botbot2,int5,int7);
+                    differ = p1.first;
+                    to_x = p1.second;
+                    break;
                 // case 5:
-                //     differ = nei.z_nei_swap_cost();
+                //     differ = nei.left_move_in_row_cost(instances,nets,botbot2,int5,int7);
                 //     break;
                 // case 6:
-                //     differ = nei.z_nei_move_cost();
+                //     differ = nei.right_move_in_row_cost(instances,nets,botbot2,int5,int7);
                 //     break;
             }
 
@@ -93,35 +105,38 @@ void annealing(Neighborhood nei, unordered_map<string,instance>& ins, unordered_
                     case 2:
                         nei.update_swap(botbot2, int5, int7, int6, int8);
                         break;
-                    case 3:
-                        if(TOP_area-tech_stack[toptech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*top_row_height+tech_stack[toptech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*top_row_height <= die_area/100*top_die_max_util && BOTTOM_area+tech_stack[bottomtech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*bottom_row_height-tech_stack[bottomtech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*bottom_row_height <= die_area/100*bottom_die_max_util){
-                            for(auto& it : instances[('C' + to_string(toptop2[int1][int3]))].connected_nets){
-                                it->dist.first -= 1;
-                                it->dist.second += 1;
-                            }
-                            for(auto& it : instances[('C' + to_string(botbot2[int5][int7]))].connected_nets){
-                                it->dist.first += 1;
-                                it->dist.second -= 1;
-                            }
-                            TOP_area = TOP_area-tech_stack[toptech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*top_row_height+tech_stack[toptech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*top_row_height;
-                            BOTTOM_area = BOTTOM_area+tech_stack[bottomtech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*bottom_row_height-tech_stack[bottomtech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*bottom_row_height;
-                            nei.update_two_die_swap(toptop2, botbot2, int1, int3, int5, int7);
-                        }  
-                        break;
-                    // case 4:
-                    //     nei.update_swap(botbot2, toptop2, int5, int7, int1, int3);
+                    // case 3:
+                    //     if(TOP_area-tech_stack[toptech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*top_row_height+tech_stack[toptech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*top_row_height <= die_area/100*top_die_max_util && BOTTOM_area+tech_stack[bottomtech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*bottom_row_height-tech_stack[bottomtech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*bottom_row_height <= die_area/100*bottom_die_max_util){
+                    //         for(auto& it : instances[('C' + to_string(toptop2[int1][int3]))].connected_nets){
+                    //             it->dist.first -= 1;
+                    //             it->dist.second += 1;
+                    //         }
+                    //         for(auto& it : instances[('C' + to_string(botbot2[int5][int7]))].connected_nets){
+                    //             it->dist.first += 1;
+                    //             it->dist.second -= 1;
+                    //         }
+                    //         TOP_area = TOP_area-tech_stack[toptech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*top_row_height+tech_stack[toptech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*top_row_height;
+                    //         BOTTOM_area = BOTTOM_area+tech_stack[bottomtech].libcells[instances["C"+to_string(toptop2[int1][int3])].libcell_type].width*bottom_row_height-tech_stack[bottomtech].libcells[instances["C"+to_string(botbot2[int5][int7])].libcell_type].width*bottom_row_height;
+                    //         nei.update_two_die_swap(toptop2, botbot2, int1, int3, int5, int7);
+                    //     }  
                     //     break;
+                    case 3:
+                        nei.update_move_in_row(toptop2,int1,int3,to_x);
+                        break;
+                    case 4:
+                        nei.update_move_in_row(botbot2,int5,int7,to_x);
+                        break;
                     // case 5:
-                    //     nei.z_nei_swap();
+                    //     nei.update_left_move_in_row(botbot2,int5,int7);
                     //     break;
                     // case 6:
-                    //     nei.z_nei_move();
+                    //     nei.update_right_move_in_row(botbot2,int5,int7);
                     //     break;
                 }  
             }
         }
         long long int later_cost = nei.calc_cost(ins, nets);
-        fout << later_cost << endl;
+        // fout << later_cost << endl;
         cout << later_cost << endl;
         alpha = control_alpha(later_cost, original_cost);
         T = alpha * T;

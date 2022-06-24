@@ -22,22 +22,22 @@ Kraftwerk2::Kraftwerk2(unordered_map<string, instance>& map){ //n: num instances
         if(it.second.tech == TECH::TECH_A){
             acceptable_x_max = die_upper_x - tech_stack[0].libcells[it.second.libcell_type].width;
             if(it.second.part == PART::TOP){
-                w_i[n] = 0.2*static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
+                w_i[n] = 5*static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
                 acceptable_y_max = top_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
             }
             else{
-                w_i[n] = 0.2*static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
+                w_i[n] = 5*static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[0].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
                 acceptable_y_max = bottom_die_upper_y - tech_stack[0].libcells[it.second.libcell_type].height;   
             }
             
         }else if(it.second.tech == TECH::TECH_B){
             acceptable_x_max = die_upper_x - tech_stack[1].libcells[it.second.libcell_type].width;
             if(it.second.part == PART::TOP){
-                w_i[n] = 0.2*static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
+                w_i[n] = 5*static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(TOP_area);
                 acceptable_y_max = top_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
             }
             else{
-                w_i[n] = 0.2*static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
+                w_i[n] = 5*static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].width) * static_cast<double>(tech_stack[1].libcells[it.second.libcell_type].height) / static_cast<double>(BOTTOM_area);
                 acceptable_y_max = bottom_die_upper_y - tech_stack[1].libcells[it.second.libcell_type].height;   
             }
         }
@@ -364,7 +364,7 @@ void Kraftwerk2::get_solution(unordered_map<string, instance>& map){
         it.second.instance_pos.y = solution_y(n) ;
     }
 }
-
+/*
 void Kraftwerk2::update_bound(string net_name){
     int left = INT32_MAX;
     int right = INT32_MIN;
@@ -487,6 +487,7 @@ void Kraftwerk2::gen_connectivity_matrix(unordered_map<string, net*> map){
     }
     return;
 }
+*/
 
 void Kraftwerk2::print_mat(){
     cout << "connectivity mat: \n"; 
@@ -615,6 +616,18 @@ void Kraftwerk2::calc_gradient(unordered_map<string, instance> map, fstream& fou
     }
     cal_D(map, D_top, D_bottom);
     cal_phi(D_top, phi_top, D_bottom, phi_bottom, 10);
+    for(int i = 0; i < D_top.size(); i++){
+        for(int j = 0; j < D_top[i].size(); j++){
+            fout << D_top[i][j] << " ";
+        }
+        fout << endl;
+    }
+    for(int i = 0; i < D_top.size(); i++){
+        for(int j = 0; j < D_top[i].size(); j++){
+            fout << phi_top[i][j] << " ";
+        }
+        fout << endl;
+    }
     int delta = min(top_row_height,bottom_row_height);
     for(auto& it : map){
         int n = parse_inst_name(it.first);
@@ -671,9 +684,9 @@ void Kraftwerk2::update_pos_diff(fstream& fout){
 
 void Kraftwerk2::Kraftwerk2_global_placement(unordered_map<string,instance>& ins, fstream& fout){
     cout << "global placement started\n";
-    for(int i=0; i<50; i++){
+    for(int i=0; i<1; i++){
         if(i%10 == 0){
-            gen_connectivity_matrix(nets);
+            // gen_connectivity_matrix(nets);
         }
         calc_gradient(ins,fout);
         update_pos_diff(fout);

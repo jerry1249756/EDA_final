@@ -183,4 +183,39 @@ void stretch(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_r
     }
 }
 
-
+void press(vector<vector<int>>& top_die_row, vector<vector<int>>& bottom_die_row){
+    int toptech, bottomtech;
+    if(top_die_tech == "TA" && bottom_die_tech == "TB"){
+        toptech = 0;
+        bottomtech = 1;
+    }
+    else if(top_die_tech == "TB" && bottom_die_tech == "TA"){
+        toptech = 1;
+        bottomtech = 0;
+    }
+    else{
+        toptech = 0;
+        bottomtech = 0;
+    }
+    int probeL;
+    for(int i=0; i<top_die_row.size(); i++){
+        probeL = die_lower_x;
+        for(int j=0; j<top_die_row[i].size(); j++){
+            instances["C"+to_string(top_die_row[i][j])].instance_pos.x = probeL;
+            probeL += tech_stack[toptech].libcells[instances["C"+to_string(top_die_row[i][j])].libcell_type].width;
+        }
+        for(int j=0; j<top_die_row[i].size(); j++){
+            instances["C"+to_string(top_die_row[i][j])].instance_pos.x += ((die_upper_x-die_lower_x)/2-(probeL-die_lower_x)/2);
+        }
+    }
+    for(int i=0; i<bottom_die_row.size(); i++){
+        probeL = die_lower_x;
+        for(int j=0; j<bottom_die_row[i].size(); j++){
+            instances["C"+to_string(bottom_die_row[i][j])].instance_pos.x = probeL;
+            probeL += tech_stack[toptech].libcells[instances["C"+to_string(bottom_die_row[i][j])].libcell_type].width;
+        }
+        for(int j=0; j<bottom_die_row[i].size(); j++){
+            instances["C"+to_string(bottom_die_row[i][j])].instance_pos.x += ((die_upper_x-die_lower_x)/2-(probeL-die_lower_x)/2);
+        }
+    }
+}
